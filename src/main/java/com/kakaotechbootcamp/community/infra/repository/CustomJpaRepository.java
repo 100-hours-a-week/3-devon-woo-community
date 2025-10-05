@@ -15,6 +15,8 @@ public interface CustomJpaRepository<T, ID> {
 
     List<T> findAll();
 
+    List<T> findAllById(Iterable<ID> ids);
+
     void deleteById(ID id);
 
     long count();

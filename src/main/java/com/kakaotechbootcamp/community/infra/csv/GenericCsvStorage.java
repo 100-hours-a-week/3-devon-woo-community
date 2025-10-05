@@ -133,6 +133,28 @@ public class GenericCsvStorage<T, ID> implements CrudStorage<T, ID> {
     }
 
     @Override
+    public List<T> findAllById(Iterable<ID> ids) {
+        lock.readLock().lock();
+        try {
+            List<String> lines = readAllLines();
+            List<ID> idList = new ArrayList<>();
+            ids.forEach(idList::add);
+
+            return lines.stream()
+                    .skip(1)
+                    .map(this::csvLineToEntity)
+                    .filter(entity -> idList.contains(idExtractor.apply(entity)))
+                    .toList();
+
+        } catch (IOException e) {
+            log.error("Failed to find entities by ids: {}", ids, e);
+            return new ArrayList<>();
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    @Override
     public void deleteById(ID id) {
         lock.writeLock().lock();
         try {

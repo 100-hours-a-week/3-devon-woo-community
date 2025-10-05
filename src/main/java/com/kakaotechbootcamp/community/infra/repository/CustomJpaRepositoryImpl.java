@@ -57,6 +57,11 @@ public abstract class CustomJpaRepositoryImpl<T, ID> implements CustomJpaReposit
     }
 
     @Override
+    public List<T> findAllById(Iterable<ID> ids) {
+        return storage.findAllById(ids);
+    }
+
+    @Override
     public void deleteById(ID id) {
         storage.deleteById(id);
     }
