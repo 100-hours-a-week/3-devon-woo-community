@@ -1,37 +1,44 @@
 package com.kakaotechbootcamp.community.application.auth.controller;
 
 import com.kakaotechbootcamp.community.application.auth.dto.LoginRequest;
+import com.kakaotechbootcamp.community.application.auth.dto.LoginResponse;
 import com.kakaotechbootcamp.community.application.auth.dto.SignupRequest;
+import com.kakaotechbootcamp.community.application.auth.dto.SignupResponse;
+import com.kakaotechbootcamp.community.application.auth.service.LoginService;
+import com.kakaotechbootcamp.community.application.auth.service.SignupService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
+    private final LoginService loginService;
+    private final SignupService signupService;
+
     @PostMapping("/signup")
-    public ApiResponse<Void> signUp(
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<SignupResponse> signUp(
             @RequestBody @Validated SignupRequest request
     ){
-
-        return ApiResponse.success();
+        SignupResponse response = signupService.signup(request);
+        return ApiResponse.success(response, "signup_success");
     }
 
     @PostMapping("/login")
-    public ApiResponse<Void> login(
+    public ApiResponse<LoginResponse> login(
             @RequestBody @Validated LoginRequest request
     ){
-
-        return ApiResponse.success();
+        LoginResponse response = loginService.login(request);
+        return ApiResponse.success(response, "login_success");
     }
 
     @PostMapping("/logout")
     public ApiResponse<Void> logout(){
-
-        return ApiResponse.success();
+        return ApiResponse.success(null, "logout_success");
     }
 }

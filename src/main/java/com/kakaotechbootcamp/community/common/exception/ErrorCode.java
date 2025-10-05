@@ -18,7 +18,11 @@ public enum ErrorCode {
     INVALID_NICKNAME(HttpStatus.BAD_REQUEST, "invalid_nickname"),
     INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "invalid_password_format"),
     MISSING_PASSWORD(HttpStatus.BAD_REQUEST, "missing_password"),
-    INVALID_CURRENT_PASSWORD(HttpStatus.UNAUTHORIZED, "invalid_current_password");
+    INVALID_CURRENT_PASSWORD(HttpStatus.UNAUTHORIZED, "invalid_current_password"),
+
+    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "duplicate_email"),
+    DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "duplicate_nickname"),
+    INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "invalid_password");
 
     private final HttpStatus httpStatus;
     private final String message;
