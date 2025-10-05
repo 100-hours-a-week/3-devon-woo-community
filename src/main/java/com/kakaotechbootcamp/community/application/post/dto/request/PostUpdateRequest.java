@@ -1,20 +1,17 @@
 package com.kakaotechbootcamp.community.application.post.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.Pattern;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class PostUpdateRequest {
+import static com.kakaotechbootcamp.community.common.validation.ValidationPatterns.*;
 
-    @NotBlank(message = "게시글 제목은 필수입니다")
-    private String title;
+public record PostUpdateRequest(
+        @NotBlank(message = "invalid_request")
+        String title,
 
-    @NotBlank(message = "게시글 내용은 필수입니다")
-    private String content;
+        @NotBlank(message = "invalid_request")
+        String content,
 
-    private String image;
-}
+        @Pattern(regexp = URL_PATTERN, message = "invalid_image_url")
+        String image
+) {}
