@@ -1,33 +1,36 @@
 package com.kakaotechbootcamp.community.application.post.dto.response;
 
+import com.kakaotechbootcamp.community.application.member.dto.response.MemberResponse;
+import com.kakaotechbootcamp.community.domain.member.entity.Member;
+import com.kakaotechbootcamp.community.domain.post.entity.Attachment;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
 
 import java.time.LocalDateTime;
 
 public record PostResponse(
         Long postId,
-        Long authorId,
+        MemberResponse author,
         String title,
         String content,
-        String image,
+        String imageUrl,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         Long views,
         Long likes,
         Long commentCount
 ) {
-    public static PostResponse of(Post post) {
+    public static PostResponse of(Post post, Member member, Attachment attachment, long commentCount) {
         return new PostResponse(
                 post.getId(),
-                post.getAuthorId(),
+                MemberResponse.of(member),
                 post.getTitle(),
                 post.getContent(),
-                null, // image는 현재 Post 엔티티에 없음
+                attachment != null ? attachment.getAttachmentUrl() : null,
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
                 post.getViewsCount(),
                 post.getLikeCount(),
-                0L // TODO: 댓글 수 계산 로직 추가
+                commentCount
         );
     }
 }

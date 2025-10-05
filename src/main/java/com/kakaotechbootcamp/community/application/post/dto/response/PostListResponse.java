@@ -11,13 +11,10 @@ public record PostListResponse(
         long totalElements,
         int totalPages
 ) {
-    public static PostListResponse of(List<Post> posts, int page, int size) {
-        List<PostSummaryResponse> summaries = posts.stream()
-                .map(PostSummaryResponse::of)
-                .toList();
+    public static PostListResponse of(List<PostSummaryResponse> posts, int page, int size) {
 
         return new PostListResponse(
-                summaries,
+                posts,
                 page,
                 size,
                 (long) posts.size(),
