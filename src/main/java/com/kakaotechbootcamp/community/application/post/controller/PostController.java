@@ -2,6 +2,7 @@ package com.kakaotechbootcamp.community.application.post.controller;
 
 import com.kakaotechbootcamp.community.application.post.dto.request.PostCreateRequest;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRequest;
+import com.kakaotechbootcamp.community.application.post.dto.response.PostLikeResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostListResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
 import com.kakaotechbootcamp.community.application.post.service.PostService;
@@ -61,14 +62,14 @@ public class PostController {
     }
 
     @PutMapping("/{postId}/like")
-    public ApiResponse<PostResponse> likePost(@PathVariable Long postId) {
-        PostResponse response = postService.likePost(postId);
+    public ApiResponse<PostLikeResponse> likePost(@PathVariable Long postId) {
+        PostLikeResponse response = postService.likePost(postId);
         return ApiResponse.success(response, "post_liked");
     }
 
     @DeleteMapping("/{postId}/like")
-    public ApiResponse<PostResponse> unlikePost(@PathVariable Long postId) {
-        PostResponse response = postService.unlikePost(postId);
+    public ApiResponse<PostLikeResponse> unlikePost(@PathVariable Long postId) {
+        PostLikeResponse response = postService.unlikePost(postId);
         return ApiResponse.success(response, "post_unliked");
     }
 }
