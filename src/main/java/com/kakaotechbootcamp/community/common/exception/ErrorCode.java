@@ -22,7 +22,8 @@ public enum ErrorCode {
 
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "duplicate_email"),
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "duplicate_nickname"),
-    INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "invalid_password");
+    INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "invalid_password"),
+    SAME_AS_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "same_as_current_password");
 
     private final HttpStatus httpStatus;
     private final String message;

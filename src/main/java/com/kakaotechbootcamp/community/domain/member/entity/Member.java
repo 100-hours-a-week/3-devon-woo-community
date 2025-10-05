@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Builder(toBuilder = true)
@@ -32,5 +33,14 @@ public class Member {
                 .nickname(nickname)
                 .profileImageUrl(profileImageUrl)
                 .build();
+    }
+
+    public void updateProfile(String nickname, String profileImageUrl) {
+        this.nickname = nickname != null ? nickname : this.nickname;
+        this.profileImageUrl = profileImageUrl != null ? profileImageUrl : this.profileImageUrl;
+    }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
     }
 }
