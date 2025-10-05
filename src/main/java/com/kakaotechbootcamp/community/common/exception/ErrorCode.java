@@ -23,7 +23,10 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "duplicate_email"),
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "duplicate_nickname"),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "invalid_password"),
-    SAME_AS_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "same_as_current_password");
+    SAME_AS_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "same_as_current_password"),
+
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "post_not_found"),
+    NO_PERMISSION(HttpStatus.FORBIDDEN, "no_permission");
 
     private final HttpStatus httpStatus;
     private final String message;

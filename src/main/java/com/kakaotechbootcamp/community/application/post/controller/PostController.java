@@ -4,29 +4,28 @@ import com.kakaotechbootcamp.community.application.post.dto.request.PostCreateRe
 import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRequest;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostListResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
+import com.kakaotechbootcamp.community.application.post.service.PostService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/posts")
+@RequiredArgsConstructor
 public class PostController {
+
+    private final PostService postService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<PostResponse> createPost(
             @RequestBody @Validated PostCreateRequest request
     ) {
-        PostResponse response = PostResponse.builder()
-                .postId(123L)
-                .title(request.getTitle())
-                .content(request.getContent())
-                .image(request.getImage())
-                .updatedAt(java.time.LocalDateTime.now())
-                .build();
-
-        return ApiResponse.success(response);
+        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+        PostResponse response = postService.createPost(request, authorId);
+        return ApiResponse.success(response, "post_created");
     }
 
     @PatchMapping("/{postId}")
@@ -34,41 +33,21 @@ public class PostController {
             @PathVariable Long postId,
             @RequestBody @Validated PostUpdateRequest request
     ) {
-        PostResponse response = PostResponse.builder()
-                .postId(postId)
-                .title(request.getTitle())
-                .content(request.getContent())
-                .image(request.getImage())
-                .createdAt(java.time.LocalDateTime.now().minusHours(1))
-                .updatedAt(java.time.LocalDateTime.now())
-                .build();
-
-        return ApiResponse.success(response);
+        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+        PostResponse response = postService.updatePost(postId, request, authorId);
+        return ApiResponse.success(response, "post_updated");
     }
 
     @DeleteMapping("/{postId}")
-    public ApiResponse<PostResponse> deletePost(@PathVariable Long postId) {
-        PostResponse response = PostResponse.builder()
-                .postId(postId)
-                .build();
-
-        return ApiResponse.success(response, "post_deleted");
+    public ApiResponse<Void> deletePost(@PathVariable Long postId) {
+        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+        postService.deletePost(postId, authorId);
+        return ApiResponse.success(null, "post_deleted");
     }
 
     @GetMapping("/{postId}")
     public ApiResponse<PostResponse> getPost(@PathVariable Long postId) {
-        PostResponse response = PostResponse.builder()
-                .postId(postId)
-                .authorId(10L)
-                .title("게시글 제목")
-                .content("게시글 내용")
-                .createdAt(java.time.LocalDateTime.now().minusHours(2))
-                .updatedAt(java.time.LocalDateTime.now().minusMinutes(30))
-                .views(123L)
-                .likes(45L)
-                .commentCount(6L)
-                .build();
-
+        PostResponse response = postService.getPost(postId);
         return ApiResponse.success(response, "post_retrieved");
     }
 
@@ -77,44 +56,19 @@ public class PostController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        PostListResponse response = PostListResponse.builder()
-                .items(java.util.List.of(
-                    com.kakaotechbootcamp.community.application.post.dto.response.PostSummaryResponse.builder()
-                        .postId(1L)
-                        .title("게시글 제목 예시")
-                        .authorId(10L)
-                        .createdAt(java.time.LocalDateTime.now())
-                        .views(1024L)
-                        .likes(56L)
-                        .commentsCount(6L)
-                        .build()
-                ))
-                .page(page)
-                .size(size)
-                .totalElements(345L)
-                .totalPages(18)
-                .build();
-
+        PostListResponse response = postService.getPosts(page, size);
         return ApiResponse.success(response, "posts_retrieved");
     }
 
     @PutMapping("/{postId}/like")
     public ApiResponse<PostResponse> likePost(@PathVariable Long postId) {
-        PostResponse response = PostResponse.builder()
-                .postId(postId)
-                .likes(15L)
-                .build();
-
+        PostResponse response = postService.likePost(postId);
         return ApiResponse.success(response, "post_liked");
     }
 
     @DeleteMapping("/{postId}/like")
     public ApiResponse<PostResponse> unlikePost(@PathVariable Long postId) {
-        PostResponse response = PostResponse.builder()
-                .postId(postId)
-                .likes(14L)
-                .build();
-
+        PostResponse response = postService.unlikePost(postId);
         return ApiResponse.success(response, "post_unliked");
     }
 }

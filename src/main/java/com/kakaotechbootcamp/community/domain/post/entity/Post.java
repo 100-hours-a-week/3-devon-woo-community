@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -38,5 +40,24 @@ public class Post extends BaseEntity {
                 .viewsCount(0L)
                 .likeCount(0L)
                 .build();
+    }
+
+    public void updatePost(String title, String content) {
+        this.title = title != null ? title : this.title;
+        this.content = content != null ? content : this.content;
+    }
+
+    public void incrementViews() {
+        this.viewsCount++;
+    }
+
+    public void incrementLikes() {
+        this.likeCount++;
+    }
+
+    public void decrementLikes() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
     }
 }

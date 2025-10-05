@@ -36,7 +36,7 @@ public class MemberService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         validatePasswordUpdate(request, member);
-        
+
         member.updatePassword(request.newPassword());
         memberRepository.save(member);
     }
