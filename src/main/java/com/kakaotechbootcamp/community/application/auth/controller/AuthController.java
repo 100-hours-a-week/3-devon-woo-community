@@ -3,8 +3,7 @@ package com.kakaotechbootcamp.community.application.auth.controller;
 import com.kakaotechbootcamp.community.application.auth.dto.LoginRequest;
 import com.kakaotechbootcamp.community.application.auth.dto.SignupRequest;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +15,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ApiResponse<Void> signUp(
-            @RequestBody @Valid SignupRequest request
+            @RequestBody @Validated SignupRequest request
     ){
 
         return ApiResponse.success();
@@ -24,7 +23,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ApiResponse<Void> login(
-            @RequestBody @Valid LoginRequest request
+            @RequestBody @Validated LoginRequest request
     ){
 
         return ApiResponse.success();
