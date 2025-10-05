@@ -1,22 +1,23 @@
 package com.kakaotechbootcamp.community.application.comment.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CommentListResponse {
-
-    private Long postId;
-    private List<CommentResponse> items;
-    private int page;
-    private int size;
-    private long totalElements;
-    private int totalPages;
+public record CommentListResponse(
+        Long postId,
+        List<CommentResponse> items,
+        int page,
+        int size,
+        long totalElements,
+        int totalPages
+) {
+    public static CommentListResponse of(Long postId, List<CommentResponse> comments, int page, int size) {
+        return new CommentListResponse(
+                postId,
+                comments,
+                page,
+                size,
+                (long) comments.size(),
+                (int) Math.ceil((double) comments.size() / size)
+        );
+    }
 }

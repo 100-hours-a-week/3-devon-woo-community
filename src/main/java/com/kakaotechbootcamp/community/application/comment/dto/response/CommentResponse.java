@@ -1,23 +1,27 @@
 package com.kakaotechbootcamp.community.application.comment.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.kakaotechbootcamp.community.application.member.dto.response.MemberResponse;
+import com.kakaotechbootcamp.community.domain.member.entity.Member;
+import com.kakaotechbootcamp.community.domain.post.entity.Comment;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CommentResponse {
-
-    private Long commentId;
-    private Long postId;
-    private String content;
-    private String author;
-    private Long parentCommentId;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+public record CommentResponse(
+        Long commentId,
+        Long postId,
+        String content,
+        MemberResponse author,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+) {
+    public static CommentResponse of(Comment comment, Member member) {
+        return new CommentResponse(
+                comment.getId(),
+                comment.getPostId(),
+                comment.getContent(),
+                MemberResponse.of(member),
+                comment.getCreatedAt(),
+                comment.getUpdatedAt()
+        );
+    }
 }

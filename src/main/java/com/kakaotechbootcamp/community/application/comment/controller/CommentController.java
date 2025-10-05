@@ -4,27 +4,27 @@ import com.kakaotechbootcamp.community.application.comment.dto.request.CommentCr
 import com.kakaotechbootcamp.community.application.comment.dto.request.CommentUpdateRequest;
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentListResponse;
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentResponse;
+import com.kakaotechbootcamp.community.application.comment.service.CommentService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/community")
+@RequiredArgsConstructor
 public class CommentController {
+
+    private final CommentService commentService;
 
     @PostMapping("/comment")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CommentResponse> createComment(
             @RequestBody @Validated CommentCreateRequest request
     ) {
-        CommentResponse response = CommentResponse.builder()
-                .commentId(456L)
-                .postId(request.getPostId())
-                .content(request.getContent())
-                .createdAt(java.time.LocalDateTime.now())
-                .build();
-
+        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+        CommentResponse response = commentService.createComment(request, authorId);
         return ApiResponse.success(response, "comment_created");
     }
 
@@ -33,23 +33,22 @@ public class CommentController {
             @PathVariable Long commentId,
             @RequestBody @Validated CommentUpdateRequest request
     ) {
-        CommentResponse response = CommentResponse.builder()
-                .commentId(commentId)
-                .postId(123L)
-                .content(request.getContent())
-                .updatedAt(java.time.LocalDateTime.now())
-                .build();
-
+        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+        CommentResponse response = commentService.updateComment(commentId, request, authorId);
         return ApiResponse.success(response, "comment_updated");
     }
 
-    @DeleteMapping("/comment/{commentId}")
-    public ApiResponse<CommentResponse> deleteComment(@PathVariable Long commentId) {
-        CommentResponse response = CommentResponse.builder()
-                .commentId(commentId)
-                .build();
+    @GetMapping("/comment/{commentId}")
+    public ApiResponse<CommentResponse> getComment(@PathVariable Long commentId) {
+        CommentResponse response = commentService.getComment(commentId);
+        return ApiResponse.success(response, "comment_fetched");
+    }
 
-        return ApiResponse.success(response, "comment_deleted");
+    @DeleteMapping("/comment/{commentId}")
+    public ApiResponse<Void> deleteComment(@PathVariable Long commentId) {
+        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+        commentService.deleteComment(commentId, authorId);
+        return ApiResponse.success(null, "comment_deleted");
     }
 
     @GetMapping("/post/{postId}")
@@ -58,23 +57,7 @@ public class CommentController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        CommentListResponse response = CommentListResponse.builder()
-                .postId(postId)
-                .items(java.util.List.of(
-                    CommentResponse.builder()
-                        .commentId(1L)
-                        .content("좋은 글이네요!")
-                        .author("user1")
-                        .parentCommentId(null)
-                        .createdAt(java.time.LocalDateTime.now())
-                        .build()
-                ))
-                .page(page)
-                .size(size)
-                .totalElements(2L)
-                .totalPages(1)
-                .build();
-
+        CommentListResponse response = commentService.getCommentsByPostId(postId, page, size);
         return ApiResponse.success(response, "comment_list_fetched");
     }
 }
