@@ -1,21 +1,27 @@
 package com.kakaotechbootcamp.community.application.post.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.kakaotechbootcamp.community.domain.post.entity.Post;
 
 import java.util.List;
 
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PostListResponse {
+public record PostListResponse(
+        List<PostSummaryResponse> items,
+        int page,
+        int size,
+        long totalElements,
+        int totalPages
+) {
+    public static PostListResponse of(List<Post> posts, int page, int size) {
+        List<PostSummaryResponse> summaries = posts.stream()
+                .map(PostSummaryResponse::of)
+                .toList();
 
-    private List<PostSummaryResponse> items;
-    private int page;
-    private int size;
-    private long totalElements;
-    private int totalPages;
+        return new PostListResponse(
+                summaries,
+                page,
+                size,
+                (long) posts.size(),
+                (int) Math.ceil((double) posts.size() / size)
+        );
+    }
 }

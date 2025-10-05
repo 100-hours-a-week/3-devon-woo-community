@@ -1,23 +1,27 @@
 package com.kakaotechbootcamp.community.application.post.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.kakaotechbootcamp.community.domain.post.entity.Post;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PostSummaryResponse {
-
-    private Long postId;
-    private String title;
-    private Long authorId;
-    private LocalDateTime createdAt;
-    private Long views;
-    private Long likes;
-    private Long commentsCount;
+public record PostSummaryResponse(
+        Long postId,
+        String title,
+        Long authorId,
+        LocalDateTime createdAt,
+        Long views,
+        Long likes,
+        Long commentsCount
+) {
+    public static PostSummaryResponse of(Post post) {
+        return new PostSummaryResponse(
+                post.getId(),
+                post.getTitle(),
+                post.getAuthorId(),
+                post.getCreatedAt(),
+                post.getViewsCount(),
+                post.getLikeCount(),
+                0L // TODO: 댓글 수 계산 로직 추가
+        );
+    }
 }

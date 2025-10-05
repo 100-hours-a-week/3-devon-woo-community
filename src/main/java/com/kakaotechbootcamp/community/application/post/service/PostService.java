@@ -4,7 +4,6 @@ import com.kakaotechbootcamp.community.application.post.dto.request.PostCreateRe
 import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRequest;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostListResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
-import com.kakaotechbootcamp.community.application.post.dto.response.PostSummaryResponse;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.ErrorCode;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
@@ -24,7 +23,7 @@ public class PostService {
         Post post = Post.createWithoutId(authorId, request.title(), request.content());
         Post savedPost = postRepository.save(post);
 
-        return convertToPostResponse(savedPost);
+        return PostResponse.of(savedPost);
     }
 
     public PostResponse getPost(Long postId) {
@@ -34,23 +33,13 @@ public class PostService {
         post.incrementViews();
         postRepository.save(post);
 
-        return convertToPostResponse(post);
+        return PostResponse.of(post);
     }
 
     public PostListResponse getPosts(int page, int size) {
         List<Post> posts = postRepository.findAll();
 
-        List<PostSummaryResponse> summaries = posts.stream()
-                .map(this::convertToPostSummaryResponse)
-                .toList();
-
-        return PostListResponse.builder()
-                .items(summaries)
-                .page(page)
-                .size(size)
-                .totalElements((long) posts.size())
-                .totalPages((int) Math.ceil((double) posts.size() / size))
-                .build();
+        return PostListResponse.of(posts, page, size);
     }
 
     public PostResponse updatePost(Long postId, PostUpdateRequest request, Long authorId) {
@@ -62,7 +51,7 @@ public class PostService {
         post.updatePost(request.title(), request.content());
         Post savedPost = postRepository.save(post);
 
-        return convertToPostResponse(savedPost);
+        return PostResponse.of(savedPost);
     }
 
     public void deletePost(Long postId, Long authorId) {
@@ -81,7 +70,7 @@ public class PostService {
         post.incrementLikes();
         Post savedPost = postRepository.save(post);
 
-        return convertToPostResponse(savedPost);
+        return PostResponse.of(savedPost);
     }
 
     public PostResponse unlikePost(Long postId) {
@@ -91,7 +80,7 @@ public class PostService {
         post.decrementLikes();
         Post savedPost = postRepository.save(post);
 
-        return convertToPostResponse(savedPost);
+        return PostResponse.of(savedPost);
     }
 
     private void validateAuthor(Post post, Long authorId) {
@@ -100,28 +89,4 @@ public class PostService {
         }
     }
 
-    private PostResponse convertToPostResponse(Post post) {
-        return PostResponse.builder()
-                .postId(post.getId())
-                .authorId(post.getAuthorId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .createdAt(post.getCreatedAt())
-                .updatedAt(post.getUpdatedAt())
-                .views(post.getViewsCount())
-                .likes(post.getLikeCount())
-                .build();
-    }
-
-    private PostSummaryResponse convertToPostSummaryResponse(Post post) {
-        return PostSummaryResponse.builder()
-                .postId(post.getId())
-                .title(post.getTitle())
-                .authorId(post.getAuthorId())
-                .createdAt(post.getCreatedAt())
-                .views(post.getViewsCount())
-                .likes(post.getLikeCount())
-                .commentsCount(0L) // TODO: 댓글 수 계산 로직 추가
-                .build();
-    }
 }
