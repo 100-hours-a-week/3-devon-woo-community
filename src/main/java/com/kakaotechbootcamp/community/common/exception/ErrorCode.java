@@ -26,6 +26,7 @@ public enum ErrorCode {
     SAME_AS_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "same_as_current_password"),
 
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "post_not_found"),
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "comment_not_found"),
     NO_PERMISSION(HttpStatus.FORBIDDEN, "no_permission");
 
     private final HttpStatus httpStatus;
