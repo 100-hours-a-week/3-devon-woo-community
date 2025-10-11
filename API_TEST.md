@@ -127,7 +127,7 @@ PATCH /api/v1/members/1
 
 ### 2.2 비밀번호 변경
 ```
-POST /api/v1/members/{id}/password
+PATCH /api/v1/members/{id}/password
 Content-Type: application/json
 ```
 

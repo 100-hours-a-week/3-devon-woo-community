@@ -33,7 +33,7 @@ public class MemberController {
         return ApiResponse.success(response, "member_update_success");
     }
 
-    @PostMapping("/{id}/password")
+    @PatchMapping("/{id}/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updatePassword(
             @PathVariable Long id,
