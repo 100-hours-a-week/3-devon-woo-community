@@ -65,14 +65,20 @@ public class PostController {
     }
 
     @PutMapping("/{postId}/like")
-    public ApiResponse<PostLikeResponse> likePost(@PathVariable Long postId) {
-        PostLikeResponse response = postService.likePost(postId);
+    public ApiResponse<PostLikeResponse> likePost(
+            @PathVariable Long postId,
+            @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
+    ) {
+        PostLikeResponse response = postService.likePost(postId, memberId);
         return ApiResponse.success(response, "post_liked");
     }
 
     @DeleteMapping("/{postId}/like")
-    public ApiResponse<PostLikeResponse> unlikePost(@PathVariable Long postId) {
-        PostLikeResponse response = postService.unlikePost(postId);
+    public ApiResponse<PostLikeResponse> unlikePost(
+            @PathVariable Long postId,
+            @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
+    ) {
+        PostLikeResponse response = postService.unlikePost(postId, memberId);
         return ApiResponse.success(response, "post_unliked");
     }
 }
