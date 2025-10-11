@@ -40,7 +40,7 @@ public class PostService {
         Post post = Post.createWithoutId(authorId, request.title(), request.content());
         Post savedPost = postRepository.save(post);
 
-        return PostResponse.of(savedPost, member, null, 0);
+        return PostResponse.of(savedPost, member, null);
     }
 
     public PostResponse getPost(Long postId) {
@@ -50,12 +50,11 @@ public class PostService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Attachment attachment = attachmentRepository.findByPostId(postId)
                 .orElse(null);
-        long commentCount = commentRepository.countByPostId(postId);
 
         post.incrementViews();
         postRepository.save(post);
 
-        return PostResponse.of(post, member, attachment, commentCount);
+        return PostResponse.of(post, member, attachment);
     }
 
     public PostListResponse getPosts(int page, int size) {
@@ -101,7 +100,7 @@ public class PostService {
                 .orElseGet(() -> attachmentRepository.findByPostId(postId).orElse(null));
         long commentCount = commentRepository.countByPostId(postId);
 
-        return PostResponse.of(savedPost, member, attachment, commentCount);
+        return PostResponse.of(savedPost, member, attachment);
     }
 
     public void deletePost(Long postId, Long authorId) {

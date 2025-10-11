@@ -16,10 +16,9 @@ public record PostResponse(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         Long views,
-        Long likes,
-        Long commentCount
+        Long likes
 ) {
-    public static PostResponse of(Post post, Member member, Attachment attachment, long commentCount) {
+    public static PostResponse of(Post post, Member member, Attachment attachment) {
         return new PostResponse(
                 post.getId(),
                 MemberResponse.of(member),
@@ -29,8 +28,7 @@ public record PostResponse(
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
                 post.getViewsCount(),
-                post.getLikeCount(),
-                commentCount
+                post.getLikeCount()
         );
     }
 }
