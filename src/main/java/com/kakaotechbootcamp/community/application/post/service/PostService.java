@@ -41,9 +41,11 @@ public class PostService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Post post = Post.createWithoutId(authorId, request.title(), request.content());
+        Attachment attachment = Attachment.createWithoutId(post.getId(), request.image());
         Post savedPost = postRepository.save(post);
+        Attachment savedAttachment = attachmentRepository.save(attachment);
 
-        return PostResponse.of(savedPost, member, null);
+        return PostResponse.of(savedPost, member, savedAttachment);
     }
 
     public PostResponse getPost(Long postId) {
