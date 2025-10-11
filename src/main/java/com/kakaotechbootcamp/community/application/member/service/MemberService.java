@@ -41,6 +41,13 @@ public class MemberService {
         memberRepository.save(member);
     }
 
+    public void deleteMember(Long id) {
+        memberRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        memberRepository.deleteById(id);
+    }
+
     private void validateUpdateRequest(MemberUpdateRequest request, Member currentMember) {
         if (request.nickname() != null && !request.nickname().equals(currentMember.getNickname())) {
             if (memberRepository.existsByNickname(request.nickname())) {
