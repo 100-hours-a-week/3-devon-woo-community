@@ -20,11 +20,6 @@ public class Attachment extends BaseEntity {
 
     private String attachmentUrl;
 
-    public Attachment withId(Long id) {
-        this.id = id;
-        return this;
-    }
-
     public static Attachment createWithoutId(Long postId, String attachmentUrl) {
         return Attachment.builder()
                 .postId(postId)

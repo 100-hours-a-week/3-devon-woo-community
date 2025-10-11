@@ -28,11 +28,6 @@ public class Post extends BaseEntity {
     @Builder.Default
     private Long likeCount = 0L;
 
-    public Post withId(Long id) {
-        this.id = id;
-        return this;
-    }
-
     public static Post createWithoutId(Long authorId, String title, String content) {
         return Post.builder()
                 .authorId(authorId)

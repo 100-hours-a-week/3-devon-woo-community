@@ -11,15 +11,7 @@ import java.util.Optional;
 public class PostLikeRepositoryImpl extends CustomJpaRepositoryImpl<PostLike, Long> implements PostLikeRepository {
 
     public PostLikeRepositoryImpl() {
-        super(
-                PostLike::getId,
-                (postLike, id) -> {
-                    if (postLike.getId() != null) {
-                        return postLike;
-                    }
-                    return postLike.withId(id);
-                }
-        );
+        super(PostLike::getId);
     }
 
     @Override

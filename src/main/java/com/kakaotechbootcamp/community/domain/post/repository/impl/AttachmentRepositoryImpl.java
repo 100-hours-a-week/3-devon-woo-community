@@ -14,15 +14,7 @@ public class AttachmentRepositoryImpl extends CustomJpaRepositoryImpl<Attachment
         AttachmentRepository {
 
     public AttachmentRepositoryImpl() {
-        super(
-                Attachment::getId,
-                (attachment, id) -> {
-                    if (attachment.getId() != null) {
-                        return attachment;
-                    }
-                    return attachment.withId(id); 
-                }
-        );
+        super(Attachment::getId);
     }
 
     @Override
