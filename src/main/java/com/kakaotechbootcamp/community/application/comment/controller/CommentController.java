@@ -12,13 +12,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/posts")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/{postId}/comments")
+    @PostMapping("/posts/{postId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CommentResponse> createComment(
             @PathVariable Long postId,
@@ -27,6 +27,22 @@ public class CommentController {
         Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
         CommentResponse response = commentService.createComment(postId, request, authorId);
         return ApiResponse.success(response, "comment_created");
+    }
+
+    @GetMapping("/posts/{postId}/comments")
+    public ApiResponse<CommentListResponse> getCommentsByPost(
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        CommentListResponse response = commentService.getCommentsByPostId(postId, page, size);
+        return ApiResponse.success(response, "comment_list_fetched");
+    }
+
+    @GetMapping("/comments/{commentId}")
+    public ApiResponse<CommentResponse> getComment(@PathVariable Long commentId) {
+        CommentResponse response = commentService.getComment(commentId);
+        return ApiResponse.success(response, "comment_fetched");
     }
 
     @PatchMapping("/comments/{commentId}")
@@ -39,26 +55,10 @@ public class CommentController {
         return ApiResponse.success(response, "comment_updated");
     }
 
-    @GetMapping("/comments/{commentId}")
-    public ApiResponse<CommentResponse> getComment(@PathVariable Long commentId) {
-        CommentResponse response = commentService.getComment(commentId);
-        return ApiResponse.success(response, "comment_fetched");
-    }
-
     @DeleteMapping("/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(@PathVariable Long commentId) {
         Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
         commentService.deleteComment(commentId, authorId);
-    }
-
-    @GetMapping("/{postId}/comments")
-    public ApiResponse<CommentListResponse> getCommentsByPost(
-            @PathVariable Long postId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        CommentListResponse response = commentService.getCommentsByPostId(postId, page, size);
-        return ApiResponse.success(response, "comment_list_fetched");
     }
 }
