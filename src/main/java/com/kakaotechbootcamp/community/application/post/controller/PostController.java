@@ -24,7 +24,7 @@ public class PostController {
     public ApiResponse<PostResponse> createPost(
             @RequestBody @Validated PostCreateRequest request
     ) {
-        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
         PostResponse response = postService.createPost(request, authorId);
         return ApiResponse.success(response, "post_created");
     }
@@ -34,15 +34,18 @@ public class PostController {
             @PathVariable Long postId,
             @RequestBody @Validated PostUpdateRequest request
     ) {
-        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
         PostResponse response = postService.updatePost(postId, request, authorId);
         return ApiResponse.success(response, "post_updated");
     }
 
     @DeleteMapping("/{postId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePost(@PathVariable Long postId) {
-        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+    public void deletePost(
+            @PathVariable Long postId,
+            @RequestBody @Validated PostUpdateRequest request
+    ) {
+        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
         postService.deletePost(postId, authorId);
     }
 

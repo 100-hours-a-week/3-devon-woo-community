@@ -24,7 +24,7 @@ public class CommentController {
             @PathVariable Long postId,
             @RequestBody @Validated CommentCreateRequest request
     ) {
-        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
         CommentResponse response = commentService.createComment(postId, request, authorId);
         return ApiResponse.success(response, "comment_created");
     }
@@ -50,15 +50,18 @@ public class CommentController {
             @PathVariable Long commentId,
             @RequestBody @Validated CommentUpdateRequest request
     ) {
-        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
         CommentResponse response = commentService.updateComment(commentId, request, authorId);
         return ApiResponse.success(response, "comment_updated");
     }
 
     @DeleteMapping("/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteComment(@PathVariable Long commentId) {
-        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+    public void deleteComment(
+            @PathVariable Long commentId,
+            @RequestBody @Validated CommentUpdateRequest request
+    ) {
+        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
         commentService.deleteComment(commentId, authorId);
     }
 }
