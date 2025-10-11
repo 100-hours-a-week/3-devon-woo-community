@@ -20,7 +20,7 @@ public class PostLike extends BaseEntity {
 
     private Long memberId;
 
-    public static PostLike createWithoutId(Long postId, Long memberId) {
+    public static PostLike create(Long postId, Long memberId) {
         return PostLike.builder()
                 .postId(postId)
                 .memberId(memberId)

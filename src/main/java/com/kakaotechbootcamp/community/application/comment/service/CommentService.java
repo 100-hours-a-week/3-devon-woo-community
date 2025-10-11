@@ -34,7 +34,7 @@ public class CommentService {
         Member member = memberRepository.findById(authorId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Comment comment = Comment.createWithoutId(postId, authorId, request.content());
+        Comment comment = Comment.create(postId, authorId, request.content());
         Comment savedComment = commentRepository.save(comment);
 
         return CommentResponse.of(savedComment, member);

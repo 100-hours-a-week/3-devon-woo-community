@@ -23,7 +23,7 @@ public class Member {
 
     private String profileImageUrl;
 
-    public static Member createWithoutId(String email, String password, String nickname, String profileImageUrl) {
+    public static Member create(String email, String password, String nickname, String profileImageUrl) {
         return Member.builder()
                 .email(email)
                 .password(password)

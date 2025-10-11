@@ -22,7 +22,7 @@ public class Comment extends BaseEntity {
 
     private String content;
 
-    public static Comment createWithoutId(Long authorId, Long postId, String content) {
+    public static Comment create(Long authorId, Long postId, String content) {
         return Comment.builder()
                 .authorId(authorId)
                 .postId(postId)

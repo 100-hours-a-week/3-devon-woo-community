@@ -40,8 +40,8 @@ public class PostService {
         Member member = memberRepository.findById(authorId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Post post = Post.createWithoutId(authorId, request.title(), request.content());
-        Attachment attachment = Attachment.createWithoutId(post.getId(), request.image());
+        Post post = Post.create(authorId, request.title(), request.content());
+        Attachment attachment = Attachment.create(post.getId(), request.image());
         Post savedPost = postRepository.save(post);
         Attachment savedAttachment = attachmentRepository.save(attachment);
 
@@ -101,7 +101,7 @@ public class PostService {
         Post savedPost = postRepository.save(post);
 
         Attachment attachment = Optional.ofNullable(request.image())
-                .map(img -> attachmentRepository.save(Attachment.createWithoutId(postId, img)))
+                .map(img -> attachmentRepository.save(Attachment.create(postId, img)))
                 .orElseGet(() -> attachmentRepository.findByPostId(postId).orElse(null));
 
         return PostResponse.of(savedPost, member, attachment);
@@ -126,7 +126,7 @@ public class PostService {
         }
 
         // PostLike 엔티티 생성 및 저장
-        PostLike postLike = PostLike.createWithoutId(postId, memberId);
+        PostLike postLike = PostLike.create(postId, memberId);
         postLikeRepository.save(postLike);
 
         // 좋아요 수 증가
