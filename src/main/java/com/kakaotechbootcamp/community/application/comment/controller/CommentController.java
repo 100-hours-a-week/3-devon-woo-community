@@ -12,23 +12,24 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/community")
+@RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/comment")
+    @PostMapping("/{postId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CommentResponse> createComment(
+            @PathVariable Long postId,
             @RequestBody @Validated CommentCreateRequest request
     ) {
         Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
-        CommentResponse response = commentService.createComment(request, authorId);
+        CommentResponse response = commentService.createComment(postId, request, authorId);
         return ApiResponse.success(response, "comment_created");
     }
 
-    @PatchMapping("/comment/{commentId}")
+    @PatchMapping("/comments/{commentId}")
     public ApiResponse<CommentResponse> updateComment(
             @PathVariable Long commentId,
             @RequestBody @Validated CommentUpdateRequest request
@@ -38,20 +39,20 @@ public class CommentController {
         return ApiResponse.success(response, "comment_updated");
     }
 
-    @GetMapping("/comment/{commentId}")
+    @GetMapping("/comments/{commentId}")
     public ApiResponse<CommentResponse> getComment(@PathVariable Long commentId) {
         CommentResponse response = commentService.getComment(commentId);
         return ApiResponse.success(response, "comment_fetched");
     }
 
-    @DeleteMapping("/comment/{commentId}")
+    @DeleteMapping("/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(@PathVariable Long commentId) {
         Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
         commentService.deleteComment(commentId, authorId);
     }
 
-    @GetMapping("/post/{postId}")
+    @GetMapping("/{postId}/comments")
     public ApiResponse<CommentListResponse> getCommentsByPost(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "0") int page,

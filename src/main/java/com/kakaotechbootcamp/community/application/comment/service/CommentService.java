@@ -28,13 +28,13 @@ public class CommentService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
 
-    public CommentResponse createComment(CommentCreateRequest request, Long authorId) {
-        Post post = postRepository.findById(request.postId())
+    public CommentResponse createComment(Long postId, CommentCreateRequest request, Long authorId) {
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
         Member member = memberRepository.findById(authorId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Comment comment = Comment.createWithoutId(request.postId(), authorId, request.content());
+        Comment comment = Comment.createWithoutId(postId, authorId, request.content());
         Comment savedComment = commentRepository.save(comment);
 
         return CommentResponse.of(savedComment, member);
