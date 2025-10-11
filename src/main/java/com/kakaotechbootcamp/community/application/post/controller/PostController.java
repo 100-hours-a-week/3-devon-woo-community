@@ -40,10 +40,10 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    public ApiResponse<Void> deletePost(@PathVariable Long postId) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePost(@PathVariable Long postId) {
         Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
         postService.deletePost(postId, authorId);
-        return ApiResponse.success(null, "post_deleted");
     }
 
     @GetMapping("/{postId}")

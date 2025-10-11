@@ -45,10 +45,10 @@ public class CommentController {
     }
 
     @DeleteMapping("/comment/{commentId}")
-    public ApiResponse<Void> deleteComment(@PathVariable Long commentId) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteComment(@PathVariable Long commentId) {
         Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
         commentService.deleteComment(commentId, authorId);
-        return ApiResponse.success(null, "comment_deleted");
     }
 
     @GetMapping("/post/{postId}")
