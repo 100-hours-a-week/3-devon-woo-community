@@ -103,7 +103,6 @@ public class PostService {
         Attachment attachment = Optional.ofNullable(request.image())
                 .map(img -> attachmentRepository.save(Attachment.createWithoutId(postId, img)))
                 .orElseGet(() -> attachmentRepository.findByPostId(postId).orElse(null));
-        long commentCount = commentRepository.countByPostId(postId);
 
         return PostResponse.of(savedPost, member, attachment);
     }
