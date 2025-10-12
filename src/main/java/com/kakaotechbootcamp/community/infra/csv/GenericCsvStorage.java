@@ -1,5 +1,6 @@
 package com.kakaotechbootcamp.community.infra.csv;
 
+import com.kakaotechbootcamp.community.domain.common.BaseEntity;
 import com.kakaotechbootcamp.community.infra.repository.CrudStorage;
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,6 +9,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -62,6 +64,15 @@ public class GenericCsvStorage<T, ID> implements CrudStorage<T, ID> {
 
             ID id = idExtractor.apply(entity);
             boolean isUpdate = id != null;
+
+            if (entity instanceof BaseEntity) {
+                BaseEntity baseEntity = (BaseEntity) entity;
+                if (!isUpdate) {
+                    baseEntity.onCreate();
+                } else {
+                    baseEntity.onUpdate();
+                }
+            }
 
             if (!isUpdate) {
                 id = generateNextId();
@@ -218,9 +229,11 @@ public class GenericCsvStorage<T, ID> implements CrudStorage<T, ID> {
 
     private List<String> readAllLines() throws IOException {
         if (!Files.exists(filePath)) {
-            return List.of(createHeader());
+            List<String> lines = new ArrayList<>();
+            lines.add(createHeader());
+            return lines;
         }
-        return Files.readAllLines(filePath);
+        return new ArrayList<>(Files.readAllLines(filePath));
     }
 
     private void writeAllLines(List<String> lines) throws IOException {
@@ -228,28 +241,36 @@ public class GenericCsvStorage<T, ID> implements CrudStorage<T, ID> {
     }
 
     private String createHeader() {
-        Field[] fields = entityClass.getDeclaredFields();
         List<String> fieldNames = new ArrayList<>();
 
-        for (Field field : fields) {
-            fieldNames.add(field.getName());
+        Class<?> currentClass = entityClass;
+        while (currentClass != null && currentClass != Object.class) {
+            Field[] fields = currentClass.getDeclaredFields();
+            for (Field field : fields) {
+                fieldNames.add(field.getName());
+            }
+            currentClass = currentClass.getSuperclass();
         }
 
         return String.join(",", fieldNames);
     }
 
     private String entityToCsvLine(T entity) {
-        Field[] fields = entityClass.getDeclaredFields();
         List<String> values = new ArrayList<>();
 
-        for (Field field : fields) {
-            field.setAccessible(true);
-            try {
-                Object value = field.get(entity);
-                values.add(value == null ? "" : value.toString());
-            } catch (IllegalAccessException e) {
-                values.add("");
+        Class<?> currentClass = entityClass;
+        while (currentClass != null && currentClass != Object.class) {
+            Field[] fields = currentClass.getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                try {
+                    Object value = field.get(entity);
+                    values.add(value == null ? "" : value.toString());
+                } catch (IllegalAccessException e) {
+                    values.add("");
+                }
             }
+            currentClass = currentClass.getSuperclass();
         }
 
         return String.join(",", values);
@@ -260,10 +281,19 @@ public class GenericCsvStorage<T, ID> implements CrudStorage<T, ID> {
 
         try {
             T entity = entityClass.getDeclaredConstructor().newInstance();
-            Field[] fields = entityClass.getDeclaredFields();
 
-            for (int i = 0; i < Math.min(parts.length, fields.length); i++) {
-                Field field = fields[i];
+            List<Field> allFields = new ArrayList<>();
+            Class<?> currentClass = entityClass;
+            while (currentClass != null && currentClass != Object.class) {
+                Field[] fields = currentClass.getDeclaredFields();
+                for (Field field : fields) {
+                    allFields.add(field);
+                }
+                currentClass = currentClass.getSuperclass();
+            }
+
+            for (int i = 0; i < Math.min(parts.length, allFields.size()); i++) {
+                Field field = allFields.get(i);
                 field.setAccessible(true);
                 String value = parts[i];
 
@@ -290,6 +320,8 @@ public class GenericCsvStorage<T, ID> implements CrudStorage<T, ID> {
             return Integer.valueOf(value);
         } else if (targetType == Boolean.class || targetType == boolean.class) {
             return Boolean.valueOf(value);
+        } else if (targetType == LocalDateTime.class) {
+            return LocalDateTime.parse(value);
         }
 
         return value;

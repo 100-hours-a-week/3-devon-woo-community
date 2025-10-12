@@ -15,15 +15,7 @@ import java.util.Optional;
 public class MemberRepositoryImpl extends CustomJpaRepositoryImpl<Member, Long> implements MemberRepository {
 
     public MemberRepositoryImpl() {
-        super(
-                Member::getId,
-                (member, id) -> {
-                    if (member.getId() != null) {
-                        return member;
-                    }
-                    return member.withId(id);
-                }
-        );
+        super(Member::getId);
     }
 
     @Override

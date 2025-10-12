@@ -15,18 +15,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ApiResponse<Object>> handleBusinessException(CustomException e) {
         ErrorCode errorCode = e.getErrorCode();
+        log.error("[CustomException] {} - {}", errorCode.name(), e.getMessage(), e);
         ApiResponse<Object> response = ApiResponse.failure(errorCode.getMessage());
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
     public ResponseEntity<ApiResponse<Object>> handleValidationException(Exception e) {
+        log.error("[ValidationException] {}", e.getMessage(), e);
         ApiResponse<Object> response = ApiResponse.failure("invalid_request");
         return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(Exception e) {
+        log.error("[UnhandledException] {}", e.getMessage(), e);
         ApiResponse<Object> response = ApiResponse.failure("internal_server_error");
         return ResponseEntity.internalServerError().body(response);
     }

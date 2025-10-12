@@ -12,25 +12,18 @@ import lombok.Setter;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class Comment extends BaseEntity {
+public class PostLike extends BaseEntity {
 
     private Long id;
 
-    private Long authorId;
-
     private Long postId;
 
-    private String content;
+    private Long memberId;
 
-    public static Comment create(Long authorId, Long postId, String content) {
-        return Comment.builder()
-                .authorId(authorId)
+    public static PostLike create(Long postId, Long memberId) {
+        return PostLike.builder()
                 .postId(postId)
-                .content(content)
+                .memberId(memberId)
                 .build();
-    }
-
-    public void updateContent(String content) {
-        this.content = content != null ? content : this.content;
     }
 }
