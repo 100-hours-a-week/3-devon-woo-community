@@ -12,8 +12,10 @@ import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
 import com.kakaotechbootcamp.community.domain.post.entity.Attachment;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
+import com.kakaotechbootcamp.community.domain.post.entity.PostLike;
 import com.kakaotechbootcamp.community.domain.post.repository.AttachmentRepository;
 import com.kakaotechbootcamp.community.domain.post.repository.CommentRepository;
+import com.kakaotechbootcamp.community.domain.post.repository.PostLikeRepository;
 import com.kakaotechbootcamp.community.domain.post.repository.PostRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -32,15 +34,18 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final AttachmentRepository attachmentRepository;
     private final CommentRepository commentRepository;
+    private final PostLikeRepository postLikeRepository;
 
     public PostResponse createPost(PostCreateRequest request, Long authorId) {
         Member member = memberRepository.findById(authorId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Post post = Post.createWithoutId(authorId, request.title(), request.content());
+        Post post = Post.create(authorId, request.title(), request.content());
+        Attachment attachment = Attachment.create(post.getId(), request.image());
         Post savedPost = postRepository.save(post);
+        Attachment savedAttachment = attachmentRepository.save(attachment);
 
-        return PostResponse.of(savedPost, member, null, 0);
+        return PostResponse.of(savedPost, member, savedAttachment);
     }
 
     public PostResponse getPost(Long postId) {
@@ -50,12 +55,11 @@ public class PostService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Attachment attachment = attachmentRepository.findByPostId(postId)
                 .orElse(null);
-        long commentCount = commentRepository.countByPostId(postId);
 
         post.incrementViews();
         postRepository.save(post);
 
-        return PostResponse.of(post, member, attachment, commentCount);
+        return PostResponse.of(post, member, attachment);
     }
 
     public PostListResponse getPosts(int page, int size) {
@@ -97,11 +101,10 @@ public class PostService {
         Post savedPost = postRepository.save(post);
 
         Attachment attachment = Optional.ofNullable(request.image())
-                .map(img -> attachmentRepository.save(Attachment.createWithoutId(postId, img)))
+                .map(img -> attachmentRepository.save(Attachment.create(postId, img)))
                 .orElseGet(() -> attachmentRepository.findByPostId(postId).orElse(null));
-        long commentCount = commentRepository.countByPostId(postId);
 
-        return PostResponse.of(savedPost, member, attachment, commentCount);
+        return PostResponse.of(savedPost, member, attachment);
     }
 
     public void deletePost(Long postId, Long authorId) {
@@ -113,20 +116,39 @@ public class PostService {
         postRepository.deleteById(postId);
     }
 
-    public PostLikeResponse likePost(Long postId) {
+    public PostLikeResponse likePost(Long postId, Long memberId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
+        // 이미 좋아요를 눌렀는지 확인
+        if (postLikeRepository.existsByPostIdAndMemberId(postId, memberId)) {
+            throw new CustomException(ErrorCode.ALREADY_LIKED);
+        }
+
+        // PostLike 엔티티 생성 및 저장
+        PostLike postLike = PostLike.create(postId, memberId);
+        postLikeRepository.save(postLike);
+
+        // 좋아요 수 증가
         post.incrementLikes();
         postRepository.save(post);
 
         return PostLikeResponse.of(postId, post.getLikeCount());
     }
 
-    public PostLikeResponse unlikePost(Long postId) {
+    public PostLikeResponse unlikePost(Long postId, Long memberId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
+        // 좋아요를 눌렀는지 확인
+        if (!postLikeRepository.existsByPostIdAndMemberId(postId, memberId)) {
+            throw new CustomException(ErrorCode.LIKE_NOT_FOUND);
+        }
+
+        // PostLike 엔티티 삭제
+        postLikeRepository.deleteByPostIdAndMemberId(postId, memberId);
+
+        // 좋아요 수 감소
         post.decrementLikes();
         postRepository.save(post);
 

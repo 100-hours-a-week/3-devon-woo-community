@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
+@Setter
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,11 +23,7 @@ public class Member {
 
     private String profileImageUrl;
 
-    public Member withId(Long id) {
-        return this.toBuilder().id(id).build();
-    }
-
-    public static Member createWithoutId(String email, String password, String nickname, String profileImageUrl) {
+    public static Member create(String email, String password, String nickname, String profileImageUrl) {
         return Member.builder()
                 .email(email)
                 .password(password)

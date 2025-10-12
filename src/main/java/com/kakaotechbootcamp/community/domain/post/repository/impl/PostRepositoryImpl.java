@@ -9,14 +9,6 @@ import org.springframework.stereotype.Repository;
 public class PostRepositoryImpl extends CustomJpaRepositoryImpl<Post, Long> implements PostRepository {
 
     public PostRepositoryImpl() {
-        super(
-                Post::getId,
-                (post, id) -> {
-                    if (post.getId() != null) {
-                        return post;
-                    }
-                    return post.withId(id);
-                }
-        );
+        super(Post::getId);
     }
 }

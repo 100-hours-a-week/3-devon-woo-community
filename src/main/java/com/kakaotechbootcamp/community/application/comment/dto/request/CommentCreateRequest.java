@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record CommentCreateRequest(
         @NotNull(message = "invalid_request")
-        Long postId,
+        Long authorId, // TODO: JWT 도입 후 제거 예정
 
         @NotBlank(message = "invalid_request")
         String content

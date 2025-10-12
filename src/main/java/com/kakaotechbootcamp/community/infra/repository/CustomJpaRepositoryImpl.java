@@ -21,6 +21,18 @@ public abstract class CustomJpaRepositoryImpl<T, ID> implements CustomJpaReposit
     private final Class<T> entityClass;
 
     @SuppressWarnings("unchecked")
+    protected CustomJpaRepositoryImpl(Function<T, ID> idExtractor) {
+        ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
+        this.entityClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
+        Field idField = findIdField(entityClass);
+        this.storage = new GenericCsvStorage<>(
+                entityClass,
+                idExtractor,
+                (entity, id) -> setIdReflection(entity, id, idField)
+        );
+    }
+
+    @SuppressWarnings("unchecked")
     protected CustomJpaRepositoryImpl(Function<T, ID> idExtractor, BiFunction<T, ID, T> idSetter) {
         ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
         this.entityClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
@@ -71,6 +83,17 @@ public abstract class CustomJpaRepositoryImpl<T, ID> implements CustomJpaReposit
         return storage.count();
     }
 
+    private T setIdReflection(T entity, ID id, Field idField) {
+        try {
+            idField.setAccessible(true);
+            idField.set(entity, id);
+            return entity;
+        } catch (IllegalAccessException e) {
+            log.error("Failed to set ID on entity: {}, id: {}", entity, id, e);
+            throw new RuntimeException("Failed to set ID on entity", e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private ID extractIdReflection(T entity, Field idField) {
         try {
@@ -81,6 +104,7 @@ public abstract class CustomJpaRepositoryImpl<T, ID> implements CustomJpaReposit
         }
     }
 
+    @Deprecated
     private T createWithIdReflection(T entity, ID id, Field idField) {
         try {
             T newEntity = copyEntityReflection(entity);

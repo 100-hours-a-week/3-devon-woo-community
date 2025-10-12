@@ -24,7 +24,7 @@ public class PostController {
     public ApiResponse<PostResponse> createPost(
             @RequestBody @Validated PostCreateRequest request
     ) {
-        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
         PostResponse response = postService.createPost(request, authorId);
         return ApiResponse.success(response, "post_created");
     }
@@ -34,16 +34,19 @@ public class PostController {
             @PathVariable Long postId,
             @RequestBody @Validated PostUpdateRequest request
     ) {
-        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
         PostResponse response = postService.updatePost(postId, request, authorId);
         return ApiResponse.success(response, "post_updated");
     }
 
     @DeleteMapping("/{postId}")
-    public ApiResponse<Void> deletePost(@PathVariable Long postId) {
-        Long authorId = 1L; // TODO: 인증된 사용자 ID로 변경
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePost(
+            @PathVariable Long postId,
+            @RequestBody @Validated PostUpdateRequest request
+    ) {
+        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
         postService.deletePost(postId, authorId);
-        return ApiResponse.success(null, "post_deleted");
     }
 
     @GetMapping("/{postId}")
@@ -62,14 +65,20 @@ public class PostController {
     }
 
     @PutMapping("/{postId}/like")
-    public ApiResponse<PostLikeResponse> likePost(@PathVariable Long postId) {
-        PostLikeResponse response = postService.likePost(postId);
+    public ApiResponse<PostLikeResponse> likePost(
+            @PathVariable Long postId,
+            @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
+    ) {
+        PostLikeResponse response = postService.likePost(postId, memberId);
         return ApiResponse.success(response, "post_liked");
     }
 
     @DeleteMapping("/{postId}/like")
-    public ApiResponse<PostLikeResponse> unlikePost(@PathVariable Long postId) {
-        PostLikeResponse response = postService.unlikePost(postId);
+    public ApiResponse<PostLikeResponse> unlikePost(
+            @PathVariable Long postId,
+            @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
+    ) {
+        PostLikeResponse response = postService.unlikePost(postId, memberId);
         return ApiResponse.success(response, "post_unliked");
     }
 }

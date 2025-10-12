@@ -18,7 +18,7 @@ public class SignupService {
     public SignupResponse signup(SignupRequest request){
         validateSignupRequest(request);
 
-        Member member = Member.createWithoutId(
+        Member member = Member.create(
                 request.email(),
                 request.password(),
                 request.nickname(),

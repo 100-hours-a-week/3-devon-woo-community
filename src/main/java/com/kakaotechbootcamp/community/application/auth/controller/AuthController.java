@@ -38,7 +38,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ApiResponse<Void> logout(){
-        return ApiResponse.success(null, "logout_success");
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(){
+        // 로그아웃 처리 (세션 무효화 등)
     }
 }

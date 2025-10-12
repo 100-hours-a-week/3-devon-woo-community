@@ -15,15 +15,7 @@ import java.util.List;
 public class CommentRepositoryImpl extends CustomJpaRepositoryImpl<Comment, Long> implements CommentRepository {
 
     public CommentRepositoryImpl() {
-        super(
-                Comment::getId,
-                (comment, id) -> {
-                    if (comment.getId() != null) {
-                        return comment;
-                    }
-                    return comment.withId(id);
-                }
-        );
+        super(Comment::getId);
     }
 
     @Override

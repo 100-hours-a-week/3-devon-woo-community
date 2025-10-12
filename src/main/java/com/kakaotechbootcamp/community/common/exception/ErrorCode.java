@@ -27,7 +27,10 @@ public enum ErrorCode {
 
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "post_not_found"),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "comment_not_found"),
-    NO_PERMISSION(HttpStatus.FORBIDDEN, "no_permission");
+    NO_PERMISSION(HttpStatus.FORBIDDEN, "no_permission"),
+
+    ALREADY_LIKED(HttpStatus.CONFLICT, "already_liked"),
+    LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "like_not_found");
 
     private final HttpStatus httpStatus;
     private final String message;
