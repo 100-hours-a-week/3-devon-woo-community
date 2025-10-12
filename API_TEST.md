@@ -359,7 +359,7 @@ DELETE /api/v1/posts/1
 
 ### 3.6 게시글 좋아요
 ```
-PUT /api/v1/posts/{postId}/like?memberId={memberId}
+Post /api/v1/posts/{postId}/like?memberId={memberId}
 ```
 
 **Query Parameters**:
@@ -367,7 +367,7 @@ PUT /api/v1/posts/{postId}/like?memberId={memberId}
 
 **Example**:
 ```
-PUT /api/v1/posts/1/like?memberId=2
+Post /api/v1/posts/1/like?memberId=2
 ```
 
 **Expected Response** (200 OK):

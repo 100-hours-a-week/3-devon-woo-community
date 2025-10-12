@@ -64,7 +64,7 @@ public class PostController {
         return ApiResponse.success(response, "posts_retrieved");
     }
 
-    @PutMapping("/{postId}/like")
+    @PostMapping("/{postId}/like")
     public ApiResponse<PostLikeResponse> likePost(
             @PathVariable Long postId,
             @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
