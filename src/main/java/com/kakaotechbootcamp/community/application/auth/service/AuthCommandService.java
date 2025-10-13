@@ -1,5 +1,7 @@
 package com.kakaotechbootcamp.community.application.auth.service;
 
+import com.kakaotechbootcamp.community.application.auth.dto.LoginRequest;
+import com.kakaotechbootcamp.community.application.auth.dto.LoginResponse;
 import com.kakaotechbootcamp.community.application.auth.dto.SignupRequest;
 import com.kakaotechbootcamp.community.application.auth.dto.SignupResponse;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
@@ -11,8 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class SignupService {
-
+public class AuthCommandService {
     private final MemberRepository memberRepository;
 
     public SignupResponse signup(SignupRequest request){
@@ -29,6 +30,15 @@ public class SignupService {
         return new SignupResponse(savedMember.getId());
     }
 
+    public LoginResponse login(LoginRequest request){
+        Member member = memberRepository.findByEmail(request.email())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        validatePassword(request.password(), member.getPassword());
+
+        return new LoginResponse(member.getId());
+    }
+
     private void validateSignupRequest(SignupRequest request){
         if (memberRepository.existsByEmail(request.email())) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
@@ -36,6 +46,12 @@ public class SignupService {
 
         if (memberRepository.existsByNickname(request.nickname())) {
             throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+    }
+
+    private void validatePassword(String rawPassword, String storedPassword) {
+        if (!rawPassword.equals(storedPassword)) {
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
     }
 }

@@ -3,7 +3,7 @@ package com.kakaotechbootcamp.community.application.member.controller;
 import com.kakaotechbootcamp.community.application.member.dto.request.MemberUpdateRequest;
 import com.kakaotechbootcamp.community.application.member.dto.request.PasswordUpdateRequest;
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberUpdateResponse;
-import com.kakaotechbootcamp.community.application.member.service.MemberService;
+import com.kakaotechbootcamp.community.application.member.service.MemberCommandService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,14 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class MemberController {
 
-    private final MemberService memberService;
+    private final MemberCommandService memberCommandService;
 
     @PatchMapping("/{id}")
     public ApiResponse<MemberUpdateResponse> updateMember(
             @PathVariable Long id,
             @RequestBody @Validated MemberUpdateRequest request
     ) {
-        MemberUpdateResponse response = memberService.updateMember(id, request);
+        MemberUpdateResponse response = memberCommandService.updateMember(id, request);
         return ApiResponse.success(response, "member_update_success");
     }
 
@@ -39,12 +39,12 @@ public class MemberController {
             @PathVariable Long id,
             @RequestBody @Validated PasswordUpdateRequest request
     ){
-        memberService.updatePassword(id, request);
+        memberCommandService.updatePassword(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteMember(@PathVariable Long id) {
-        memberService.deleteMember(id);
+        memberCommandService.deleteMember(id);
     }
 }
