@@ -7,11 +7,14 @@ import com.kakaotechbootcamp.community.application.auth.dto.SignupResponse;
 import com.kakaotechbootcamp.community.application.auth.service.LoginService;
 import com.kakaotechbootcamp.community.application.auth.service.SignupService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Auth", description = "인증 관련 API")
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class AuthController {
     private final LoginService loginService;
     private final SignupService signupService;
 
+    @Operation(summary = "회원가입")
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<SignupResponse> signUp(
@@ -29,6 +33,7 @@ public class AuthController {
         return ApiResponse.success(response, "signup_success");
     }
 
+    @Operation(summary = "로그인")
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(
             @RequestBody @Validated LoginRequest request
@@ -37,6 +42,7 @@ public class AuthController {
         return ApiResponse.success(response, "login_success");
     }
 
+    @Operation(summary = "로그아웃")
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(){
