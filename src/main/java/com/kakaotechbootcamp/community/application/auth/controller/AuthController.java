@@ -4,8 +4,7 @@ import com.kakaotechbootcamp.community.application.auth.dto.LoginRequest;
 import com.kakaotechbootcamp.community.application.auth.dto.LoginResponse;
 import com.kakaotechbootcamp.community.application.auth.dto.SignupRequest;
 import com.kakaotechbootcamp.community.application.auth.dto.SignupResponse;
-import com.kakaotechbootcamp.community.application.auth.service.LoginService;
-import com.kakaotechbootcamp.community.application.auth.service.SignupService;
+import com.kakaotechbootcamp.community.application.auth.service.AuthCommandService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,15 +16,14 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final LoginService loginService;
-    private final SignupService signupService;
+    private final AuthCommandService authCommandService;
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<SignupResponse> signUp(
             @RequestBody @Validated SignupRequest request
     ){
-        SignupResponse response = signupService.signup(request);
+        SignupResponse response = authCommandService.signup(request);
         return ApiResponse.success(response, "signup_success");
     }
 
@@ -33,7 +31,7 @@ public class AuthController {
     public ApiResponse<LoginResponse> login(
             @RequestBody @Validated LoginRequest request
     ){
-        LoginResponse response = loginService.login(request);
+        LoginResponse response = authCommandService.login(request);
         return ApiResponse.success(response, "login_success");
     }
 
