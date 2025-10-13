@@ -7,6 +7,7 @@ import com.kakaotechbootcamp.community.application.comment.dto.response.CommentR
 import com.kakaotechbootcamp.community.application.comment.service.CommentService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class CommentController {
     @PostMapping("/posts/{postId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CommentResponse> createComment(
-            @PathVariable Long postId,
+            @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @RequestBody @Validated CommentCreateRequest request
     ) {
         Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
@@ -36,9 +37,9 @@ public class CommentController {
     @Operation(summary = "게시글의 댓글 목록 조회")
     @GetMapping("/posts/{postId}/comments")
     public ApiResponse<CommentListResponse> getCommentsByPost(
-            @PathVariable Long postId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @Parameter(description = "게시글 ID") @PathVariable Long postId,
+            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "10") int size
     ) {
         CommentListResponse response = commentService.getCommentsByPostId(postId, page, size);
         return ApiResponse.success(response, "comment_list_fetched");
@@ -46,7 +47,7 @@ public class CommentController {
 
     @Operation(summary = "댓글 단건 조회")
     @GetMapping("/comments/{commentId}")
-    public ApiResponse<CommentResponse> getComment(@PathVariable Long commentId) {
+    public ApiResponse<CommentResponse> getComment(@Parameter(description = "댓글 ID") @PathVariable Long commentId) {
         CommentResponse response = commentService.getComment(commentId);
         return ApiResponse.success(response, "comment_fetched");
     }
@@ -54,7 +55,7 @@ public class CommentController {
     @Operation(summary = "댓글 수정")
     @PatchMapping("/comments/{commentId}")
     public ApiResponse<CommentResponse> updateComment(
-            @PathVariable Long commentId,
+            @Parameter(description = "댓글 ID") @PathVariable Long commentId,
             @RequestBody @Validated CommentUpdateRequest request
     ) {
         Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
@@ -66,7 +67,7 @@ public class CommentController {
     @DeleteMapping("/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(
-            @PathVariable Long commentId,
+            @Parameter(description = "댓글 ID") @PathVariable Long commentId,
             @RequestBody @Validated CommentUpdateRequest request
     ) {
         Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경

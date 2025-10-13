@@ -6,6 +6,7 @@ import com.kakaotechbootcamp.community.application.member.dto.response.MemberUpd
 import com.kakaotechbootcamp.community.application.member.service.MemberService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class MemberController {
     @Operation(summary = "회원 정보 수정")
     @PatchMapping("/{id}")
     public ApiResponse<MemberUpdateResponse> updateMember(
-            @PathVariable Long id,
+            @Parameter(description = "회원 ID") @PathVariable Long id,
             @RequestBody @Validated MemberUpdateRequest request
     ) {
         MemberUpdateResponse response = memberService.updateMember(id, request);
@@ -41,7 +42,7 @@ public class MemberController {
     @PatchMapping("/{id}/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updatePassword(
-            @PathVariable Long id,
+            @Parameter(description = "회원 ID") @PathVariable Long id,
             @RequestBody @Validated PasswordUpdateRequest request
     ){
         memberService.updatePassword(id, request);
@@ -50,7 +51,7 @@ public class MemberController {
     @Operation(summary = "회원 탈퇴")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteMember(@PathVariable Long id) {
+    public void deleteMember(@Parameter(description = "회원 ID") @PathVariable Long id) {
         memberService.deleteMember(id);
     }
 }
