@@ -5,7 +5,8 @@ import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRe
 import com.kakaotechbootcamp.community.application.post.dto.response.PostLikeResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostListResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
-import com.kakaotechbootcamp.community.application.post.service.PostService;
+import com.kakaotechbootcamp.community.application.post.service.PostCommandService;
+import com.kakaotechbootcamp.community.application.post.service.PostQueryService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PostController {
 
-    private final PostService postService;
+    private final PostCommandService postCommandService;
+    private final PostQueryService postQueryService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -25,18 +27,8 @@ public class PostController {
             @RequestBody @Validated PostCreateRequest request
     ) {
         Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
-        PostResponse response = postService.createPost(request, authorId);
+        PostResponse response = postCommandService.createPost(request, authorId);
         return ApiResponse.success(response, "post_created");
-    }
-
-    @PatchMapping("/{postId}")
-    public ApiResponse<PostResponse> updatePost(
-            @PathVariable Long postId,
-            @RequestBody @Validated PostUpdateRequest request
-    ) {
-        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
-        PostResponse response = postService.updatePost(postId, request, authorId);
-        return ApiResponse.success(response, "post_updated");
     }
 
     @DeleteMapping("/{postId}")
@@ -46,12 +38,12 @@ public class PostController {
             @RequestBody @Validated PostUpdateRequest request
     ) {
         Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
-        postService.deletePost(postId, authorId);
+        postCommandService.deletePost(postId, authorId);
     }
 
     @GetMapping("/{postId}")
     public ApiResponse<PostResponse> getPost(@PathVariable Long postId) {
-        PostResponse response = postService.getPost(postId);
+        PostResponse response = postQueryService.getPost(postId);
         return ApiResponse.success(response, "post_retrieved");
     }
 
@@ -60,7 +52,7 @@ public class PostController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        PostListResponse response = postService.getPosts(page, size);
+        PostListResponse response = postQueryService.getPosts(page, size);
         return ApiResponse.success(response, "posts_retrieved");
     }
 
@@ -69,7 +61,7 @@ public class PostController {
             @PathVariable Long postId,
             @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
-        PostLikeResponse response = postService.likePost(postId, memberId);
+        PostLikeResponse response = postCommandService.likePost(postId, memberId);
         return ApiResponse.success(response, "post_liked");
     }
 
@@ -78,7 +70,7 @@ public class PostController {
             @PathVariable Long postId,
             @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
-        PostLikeResponse response = postService.unlikePost(postId, memberId);
+        PostLikeResponse response = postCommandService.unlikePost(postId, memberId);
         return ApiResponse.success(response, "post_unliked");
     }
 }
