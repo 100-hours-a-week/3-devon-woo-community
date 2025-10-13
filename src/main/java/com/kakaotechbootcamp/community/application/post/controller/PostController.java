@@ -7,11 +7,14 @@ import com.kakaotechbootcamp.community.application.post.dto.response.PostListRes
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
 import com.kakaotechbootcamp.community.application.post.service.PostService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Post", description = "게시글 관련 API")
 @RestController
 @RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class PostController {
 
     private final PostService postService;
 
+    @Operation(summary = "게시글 생성")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<PostResponse> createPost(
@@ -29,6 +33,7 @@ public class PostController {
         return ApiResponse.success(response, "post_created");
     }
 
+    @Operation(summary = "게시글 수정")
     @PatchMapping("/{postId}")
     public ApiResponse<PostResponse> updatePost(
             @PathVariable Long postId,
@@ -39,6 +44,7 @@ public class PostController {
         return ApiResponse.success(response, "post_updated");
     }
 
+    @Operation(summary = "게시글 삭제")
     @DeleteMapping("/{postId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePost(
@@ -49,12 +55,14 @@ public class PostController {
         postService.deletePost(postId, authorId);
     }
 
+    @Operation(summary = "게시글 단건 조회")
     @GetMapping("/{postId}")
     public ApiResponse<PostResponse> getPost(@PathVariable Long postId) {
         PostResponse response = postService.getPost(postId);
         return ApiResponse.success(response, "post_retrieved");
     }
 
+    @Operation(summary = "게시글 목록 조회")
     @GetMapping
     public ApiResponse<PostListResponse> getPosts(
             @RequestParam(defaultValue = "1") int page,
@@ -64,6 +72,7 @@ public class PostController {
         return ApiResponse.success(response, "posts_retrieved");
     }
 
+    @Operation(summary = "게시글 좋아요")
     @PostMapping("/{postId}/like")
     public ApiResponse<PostLikeResponse> likePost(
             @PathVariable Long postId,
@@ -73,6 +82,7 @@ public class PostController {
         return ApiResponse.success(response, "post_liked");
     }
 
+    @Operation(summary = "게시글 좋아요 취소")
     @DeleteMapping("/{postId}/like")
     public ApiResponse<PostLikeResponse> unlikePost(
             @PathVariable Long postId,
