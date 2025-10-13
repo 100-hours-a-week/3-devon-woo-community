@@ -8,6 +8,7 @@ import com.kakaotechbootcamp.community.application.post.dto.response.PostRespons
 import com.kakaotechbootcamp.community.application.post.service.PostService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,7 +37,7 @@ public class PostController {
     @Operation(summary = "게시글 수정")
     @PatchMapping("/{postId}")
     public ApiResponse<PostResponse> updatePost(
-            @PathVariable Long postId,
+            @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @RequestBody @Validated PostUpdateRequest request
     ) {
         Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
@@ -48,7 +49,7 @@ public class PostController {
     @DeleteMapping("/{postId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePost(
-            @PathVariable Long postId,
+            @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @RequestBody @Validated PostUpdateRequest request
     ) {
         Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
@@ -57,7 +58,7 @@ public class PostController {
 
     @Operation(summary = "게시글 단건 조회")
     @GetMapping("/{postId}")
-    public ApiResponse<PostResponse> getPost(@PathVariable Long postId) {
+    public ApiResponse<PostResponse> getPost(@Parameter(description = "게시글 ID") @PathVariable Long postId) {
         PostResponse response = postService.getPost(postId);
         return ApiResponse.success(response, "post_retrieved");
     }
@@ -65,8 +66,8 @@ public class PostController {
     @Operation(summary = "게시글 목록 조회")
     @GetMapping
     public ApiResponse<PostListResponse> getPosts(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size
+            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "20") int size
     ) {
         PostListResponse response = postService.getPosts(page, size);
         return ApiResponse.success(response, "posts_retrieved");
@@ -75,8 +76,8 @@ public class PostController {
     @Operation(summary = "게시글 좋아요")
     @PostMapping("/{postId}/like")
     public ApiResponse<PostLikeResponse> likePost(
-            @PathVariable Long postId,
-            @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
+            @Parameter(description = "게시글 ID") @PathVariable Long postId,
+            @Parameter(description = "회원 ID") @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
         PostLikeResponse response = postService.likePost(postId, memberId);
         return ApiResponse.success(response, "post_liked");
@@ -85,8 +86,8 @@ public class PostController {
     @Operation(summary = "게시글 좋아요 취소")
     @DeleteMapping("/{postId}/like")
     public ApiResponse<PostLikeResponse> unlikePost(
-            @PathVariable Long postId,
-            @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
+            @Parameter(description = "게시글 ID") @PathVariable Long postId,
+            @Parameter(description = "회원 ID") @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
         PostLikeResponse response = postService.unlikePost(postId, memberId);
         return ApiResponse.success(response, "post_unliked");
