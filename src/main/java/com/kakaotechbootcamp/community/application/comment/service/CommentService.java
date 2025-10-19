@@ -4,6 +4,7 @@ import com.kakaotechbootcamp.community.application.comment.dto.request.CommentCr
 import com.kakaotechbootcamp.community.application.comment.dto.request.CommentUpdateRequest;
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentListResponse;
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentResponse;
+import com.kakaotechbootcamp.community.application.validator.AccessPolicyValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.ErrorCode;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
@@ -27,31 +28,46 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
+    private final AccessPolicyValidator accessPolicyValidator;
 
     public CommentResponse createComment(Long postId, CommentCreateRequest request, Long authorId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-        Member member = memberRepository.findById(authorId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        findPostById(postId);
+        Member author = findMemberById(authorId);
 
         Comment comment = Comment.create(postId, authorId, request.content());
-        Comment savedComment = commentRepository.save(comment);
+        commentRepository.save(comment);
 
-        return CommentResponse.of(savedComment, member);
+        return CommentResponse.of(comment, author);
+    }
+
+    public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, Long requesterId) {
+        Comment comment = findCommentById(commentId);
+        Member author = findMemberById(comment.getAuthorId());
+
+        accessPolicyValidator.checkAccess(comment.getAuthorId(), requesterId);
+
+        comment.updateContent(request.content());
+        commentRepository.save(comment);
+
+        return CommentResponse.of(comment, author);
+    }
+
+    public void deleteComment(Long commentId, Long requesterId) {
+        Comment comment = findCommentById(commentId);
+        accessPolicyValidator.checkAccess(comment.getAuthorId(), requesterId);
+
+        commentRepository.deleteById(comment.getId());
     }
 
     public CommentResponse getComment(Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
-        Member member = memberRepository.findById(comment.getAuthorId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Comment comment = findCommentById(commentId);
+        Member member = findMemberById(comment.getAuthorId());
 
         return CommentResponse.of(comment, member);
     }
 
     public CommentListResponse getCommentsByPostId(Long postId, int page, int size) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+        findPostById(postId);
 
         List<Comment> comments = commentRepository.findByPostId(postId);
 
@@ -64,44 +80,24 @@ public class CommentService {
                 .collect(Collectors.toMap(Member::getId, Function.identity()));
 
         List<CommentResponse> commentResponses = comments.stream()
-                .map(comment -> {
-                    Member member = memberMap.get(comment.getAuthorId());
-                    if (member == null) {
-                        throw new CustomException(ErrorCode.USER_NOT_FOUND);
-                    }
-                    return CommentResponse.of(comment, member);
-                })
+                .map(comment -> CommentResponse.of(comment, memberMap.get(comment.getAuthorId())))
                 .toList();
 
         return CommentListResponse.of(postId, commentResponses, page, size);
     }
 
-    public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, Long authorId) {
-        Comment comment = commentRepository.findById(commentId)
+    private Post findPostById(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+    }
+
+    private Comment findCommentById(Long commentId) {
+        return commentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
-        Member member = memberRepository.findById(comment.getAuthorId())
+    }
+
+    private Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        validateAuthor(comment, authorId);
-
-        comment.updateContent(request.content());
-        Comment savedComment = commentRepository.save(comment);
-
-        return CommentResponse.of(savedComment, member);
-    }
-
-    public void deleteComment(Long commentId, Long authorId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
-
-        validateAuthor(comment, authorId);
-
-        commentRepository.deleteById(commentId);
-    }
-
-    private void validateAuthor(Comment comment, Long authorId) {
-        if (!comment.getAuthorId().equals(authorId)) {
-            throw new CustomException(ErrorCode.NO_PERMISSION);
-        }
     }
 }
