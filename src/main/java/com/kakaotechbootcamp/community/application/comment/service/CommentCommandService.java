@@ -5,6 +5,7 @@ import com.kakaotechbootcamp.community.application.comment.dto.request.CommentUp
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentResponse;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.ErrorCode;
+import com.kakaotechbootcamp.community.application.validator.AccessPolicyValidator;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
 import com.kakaotechbootcamp.community.domain.post.entity.Comment;
@@ -19,6 +20,7 @@ public class CommentCommandService {
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
+    private final AccessPolicyValidator accessPolicyValidator;
 
     public CommentResponse createComment(Long postId, CommentCreateRequest request, Long authorId) {
         postRepository.findById(postId)
@@ -38,7 +40,7 @@ public class CommentCommandService {
         Member member = memberRepository.findById(comment.getAuthorId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        validateAuthor(comment, authorId);
+        accessPolicyValidator.checkAccess(comment.getAuthorId(), authorId);
 
         comment.updateContent(request.content());
         Comment savedComment = commentRepository.save(comment);
@@ -50,14 +52,8 @@ public class CommentCommandService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 
-        validateAuthor(comment, authorId);
+        accessPolicyValidator.checkAccess(comment.getAuthorId(), authorId);
 
         commentRepository.deleteById(commentId);
-    }
-
-    private void validateAuthor(Comment comment, Long authorId) {
-        if (!comment.getAuthorId().equals(authorId)) {
-            throw new CustomException(ErrorCode.NO_PERMISSION);
-        }
     }
 }
