@@ -31,4 +31,11 @@ public class CommentRepositoryImpl extends CustomJpaRepositoryImpl<Comment, Long
                 .filter(comment -> comment.getPostId().equals(postId))
                 .toList();
     }
+
+    @Override
+    public List<Comment> findByPostIdIn(List<Long> postIds) {
+        return findAll().stream()
+                .filter(comment -> postIds.contains(comment.getPostId()))
+                .toList();
+    }
 }
