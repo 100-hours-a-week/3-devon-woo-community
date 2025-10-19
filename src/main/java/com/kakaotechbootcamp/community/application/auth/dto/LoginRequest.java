@@ -3,11 +3,13 @@ package com.kakaotechbootcamp.community.application.auth.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+import static com.kakaotechbootcamp.community.common.validation.ValidationMessages.*;
+
 public record LoginRequest(
-        @NotBlank(message = "invalid_request")
-        @Email(message = "invalid_email_format")
+        @NotBlank(message = REQUIRED_FIELD)
+        @Email(message = INVALID_EMAIL_FORMAT)
         String email,
 
-        @NotBlank(message = "invalid_request")
+        @NotBlank(message = REQUIRED_FIELD)
         String password
 ) {}
