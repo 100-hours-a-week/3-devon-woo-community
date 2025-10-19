@@ -3,15 +3,23 @@ package com.kakaotechbootcamp.community.application.comment.dto.response;
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberResponse;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.post.entity.Comment;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 
+@Schema(description = "댓글 응답 DTO")
 public record CommentResponse(
+        @Schema(description = "댓글 ID", example = "1")
         Long commentId,
+        @Schema(description = "게시글 ID", example = "1")
         Long postId,
+        @Schema(description = "댓글 내용", example = "This is a comment.")
         String content,
+        @Schema(description = "작성자 정보")
         MemberResponse author,
+        @Schema(description = "생성 시각")
         LocalDateTime createdAt,
+        @Schema(description = "수정 시각")
         LocalDateTime updatedAt
 ) {
     public static CommentResponse of(Comment comment, Member member) {
