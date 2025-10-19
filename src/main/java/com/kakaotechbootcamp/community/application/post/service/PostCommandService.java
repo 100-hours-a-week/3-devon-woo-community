@@ -26,8 +26,7 @@ public class PostCommandService {
     private final AccessPolicyValidator accessPolicyValidator;
 
     public PostResponse createPost(PostCreateRequest request, Long authorId) {
-        Member member = memberRepository.findById(authorId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Member member = findMemberById(authorId);
 
         Post post = Post.create(authorId, request.title(), request.content());
         Attachment attachment = Attachment.create(post.getId(), request.image());
@@ -38,10 +37,9 @@ public class PostCommandService {
     }
 
     public PostResponse updatePost(Long postId, PostUpdateRequest request, Long authorId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-        Member member = memberRepository.findById(post.getAuthorId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Post post = findPostById(postId);
+        Member member = findMemberById(authorId);
+
         accessPolicyValidator.checkAccess(post.getAuthorId(), authorId);
 
         post.updatePost(request.title(), request.content());
@@ -55,11 +53,19 @@ public class PostCommandService {
     }
 
     public void deletePost(Long postId, Long authorId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-
+        Post post = findPostById(postId);
         accessPolicyValidator.checkAccess(post.getAuthorId(), authorId);
 
         postRepository.deleteById(postId);
+    }
+
+    private Post findPostById(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+    }
+
+    private Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 }
