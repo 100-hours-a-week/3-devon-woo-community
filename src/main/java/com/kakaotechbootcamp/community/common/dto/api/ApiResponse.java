@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @Builder
 @NoArgsConstructor
@@ -14,6 +16,7 @@ public class ApiResponse<T> {
     private boolean success;
     private String message;
     private T data;
+    private List<FieldError> errors;
 
     public static <T> ApiResponse<T> success() {
         return ApiResponse.<T>builder()
@@ -41,6 +44,15 @@ public class ApiResponse<T> {
                 .success(false)
                 .message(message)
                 .data(null)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> failure(String message, List<FieldError> errors) {
+        return ApiResponse.<T>builder()
+                .success(false)
+                .message(message)
+                .data(null)
+                .errors(errors)
                 .build();
     }
 }
