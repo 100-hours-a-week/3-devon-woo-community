@@ -11,6 +11,7 @@ import com.kakaotechbootcamp.community.common.exception.ErrorCode;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
 import com.kakaotechbootcamp.community.domain.post.entity.Attachment;
+import com.kakaotechbootcamp.community.domain.post.entity.Comment;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import com.kakaotechbootcamp.community.domain.post.repository.AttachmentRepository;
 import com.kakaotechbootcamp.community.domain.post.repository.CommentRepository;
@@ -87,13 +88,17 @@ public class PostService {
                 .distinct()
                 .toList();
 
+        List<Long> postIds = posts.stream()
+                .map(Post::getId)
+                .toList();
+
         Map<Long, Member> memberMap = memberRepository.findAllById(authorIds).stream()
                 .collect(Collectors.toMap(Member::getId, Function.identity()));
 
-        Map<Long, Long> commentCountMap = posts.stream()
-                .collect(Collectors.toMap(
-                        Post::getId,
-                        post -> commentRepository.countByPostId(post.getId())
+        Map<Long, Long> commentCountMap = commentRepository.findByPostIdIn(postIds).stream()
+                .collect(Collectors.groupingBy(
+                        Comment::getPostId,
+                        Collectors.counting()
                 ));
 
         List<PostSummaryResponse> postSummaries = posts.stream()
