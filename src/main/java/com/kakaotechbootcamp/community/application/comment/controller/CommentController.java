@@ -6,11 +6,17 @@ import com.kakaotechbootcamp.community.application.comment.dto.response.CommentL
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentResponse;
 import com.kakaotechbootcamp.community.application.comment.service.CommentService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
+import com.kakaotechbootcamp.community.common.swagger.CustomExceptionDescription;
+import com.kakaotechbootcamp.community.common.swagger.SwaggerResponseDescription;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Comment", description = "댓글 관련 API")
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -18,10 +24,12 @@ public class CommentController {
 
     private final CommentService commentService;
 
+    @Operation(summary = "댓글 생성", description = "게시글에 새로운 댓글을 작성합니다.")
+    @CustomExceptionDescription(SwaggerResponseDescription.COMMENT_CREATE)
     @PostMapping("/posts/{postId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CommentResponse> createComment(
-            @PathVariable Long postId,
+            @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @RequestBody @Validated CommentCreateRequest request
     ) {
         Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
@@ -29,25 +37,31 @@ public class CommentController {
         return ApiResponse.success(response, "comment_created");
     }
 
+    @Operation(summary = "게시글의 댓글 목록 조회", description = "특정 게시글의 댓글 목록을 페이징하여 조회합니다.")
+    @CustomExceptionDescription(SwaggerResponseDescription.COMMENT_LIST)
     @GetMapping("/posts/{postId}/comments")
     public ApiResponse<CommentListResponse> getCommentsByPost(
-            @PathVariable Long postId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @Parameter(description = "게시글 ID") @PathVariable Long postId,
+            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "10") int size
     ) {
         CommentListResponse response = commentService.getCommentsByPostId(postId, page, size);
         return ApiResponse.success(response, "comment_list_fetched");
     }
 
+    @Operation(summary = "댓글 단건 조회", description = "특정 댓글의 상세 정보를 조회합니다.")
+    @CustomExceptionDescription(SwaggerResponseDescription.COMMENT_GET)
     @GetMapping("/comments/{commentId}")
-    public ApiResponse<CommentResponse> getComment(@PathVariable Long commentId) {
+    public ApiResponse<CommentResponse> getComment(@Parameter(description = "댓글 ID") @PathVariable Long commentId) {
         CommentResponse response = commentService.getComment(commentId);
         return ApiResponse.success(response, "comment_fetched");
     }
 
+    @Operation(summary = "댓글 수정", description = "기존 댓글을 수정합니다.")
+    @CustomExceptionDescription(SwaggerResponseDescription.COMMENT_UPDATE)
     @PatchMapping("/comments/{commentId}")
     public ApiResponse<CommentResponse> updateComment(
-            @PathVariable Long commentId,
+            @Parameter(description = "댓글 ID") @PathVariable Long commentId,
             @RequestBody @Validated CommentUpdateRequest request
     ) {
         Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
@@ -55,10 +69,12 @@ public class CommentController {
         return ApiResponse.success(response, "comment_updated");
     }
 
+    @Operation(summary = "댓글 삭제", description = "댓글을 삭제합니다.")
+    @CustomExceptionDescription(SwaggerResponseDescription.COMMENT_DELETE)
     @DeleteMapping("/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(
-            @PathVariable Long commentId,
+            @Parameter(description = "댓글 ID") @PathVariable Long commentId,
             @RequestBody @Validated CommentUpdateRequest request
     ) {
         Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
