@@ -6,6 +6,7 @@ import com.kakaotechbootcamp.community.application.post.dto.response.PostLikeRes
 import com.kakaotechbootcamp.community.application.post.dto.response.PostListResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
 import com.kakaotechbootcamp.community.application.post.service.PostCommandService;
+import com.kakaotechbootcamp.community.application.post.service.PostLikeCommandService;
 import com.kakaotechbootcamp.community.application.post.service.PostQueryService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostCommandService postCommandService;
+    private final PostLikeCommandService postLikeCommandService;
     private final PostQueryService postQueryService;
 
     @PostMapping
@@ -61,7 +63,7 @@ public class PostController {
             @PathVariable Long postId,
             @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
-        PostLikeResponse response = postCommandService.likePost(postId, memberId);
+        PostLikeResponse response = postLikeCommandService.likePost(postId, memberId);
         return ApiResponse.success(response, "post_liked");
     }
 
@@ -70,7 +72,7 @@ public class PostController {
             @PathVariable Long postId,
             @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
-        PostLikeResponse response = postCommandService.unlikePost(postId, memberId);
+        PostLikeResponse response = postLikeCommandService.unlikePost(postId, memberId);
         return ApiResponse.success(response, "post_unliked");
     }
 }
