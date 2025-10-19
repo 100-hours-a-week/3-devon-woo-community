@@ -31,6 +31,16 @@ public class PostController {
         return ApiResponse.success(response, "post_created");
     }
 
+    @PatchMapping("/{postId}")
+    public ApiResponse<PostResponse> updatePost(
+            @PathVariable Long postId,
+            @RequestBody @Validated PostUpdateRequest request
+    ) {
+        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
+        PostResponse response = postService.updatePost(postId, request, authorId);
+        return ApiResponse.success(response, "post_updated");
+    }
+
     @DeleteMapping("/{postId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePost(
