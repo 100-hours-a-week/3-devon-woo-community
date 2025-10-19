@@ -4,9 +4,9 @@ import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.ErrorCode;
 import com.kakaotechbootcamp.community.domain.post.repository.PostLikeRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class PostLikePolicyValidator {
 

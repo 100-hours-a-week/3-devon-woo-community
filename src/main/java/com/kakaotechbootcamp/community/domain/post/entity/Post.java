@@ -1,15 +1,11 @@
 package com.kakaotechbootcamp.community.domain.post.entity;
 
 import com.kakaotechbootcamp.community.domain.common.BaseEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Builder(toBuilder = true)
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor
 public class Post extends BaseEntity {
 
