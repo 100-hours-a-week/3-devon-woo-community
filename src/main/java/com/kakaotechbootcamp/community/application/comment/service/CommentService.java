@@ -80,13 +80,7 @@ public class CommentService {
                 .collect(Collectors.toMap(Member::getId, Function.identity()));
 
         List<CommentResponse> commentResponses = comments.stream()
-                .map(comment -> {
-                    Member member = memberMap.get(comment.getAuthorId());
-                    if (member == null) {
-                        throw new CustomException(ErrorCode.USER_NOT_FOUND);
-                    }
-                    return CommentResponse.of(comment, member);
-                })
+                .map(comment -> CommentResponse.of(comment, memberMap.get(comment.getAuthorId())))
                 .toList();
 
         return CommentListResponse.of(postId, commentResponses, page, size);
