@@ -5,21 +5,22 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import static com.kakaotechbootcamp.community.common.validation.ValidationMessages.*;
 import static com.kakaotechbootcamp.community.common.validation.ValidationPatterns.*;
 
 public record SignupRequest(
-        @NotBlank(message = "invalid_request")
-        @Email(message = "invalid_email_format")
+        @NotBlank(message = REQUIRED_FIELD)
+        @Email(message = INVALID_EMAIL_FORMAT)
         String email,
 
-        @NotBlank(message = "invalid_request")
-        @Size(min = PASSWORD_MIN_LENGTH, message = "invalid_password_format")
+        @NotBlank(message = REQUIRED_FIELD)
+        @Size(min = PASSWORD_MIN_LENGTH, message = INVALID_PASSWORD_FORMAT)
         String password,
 
-        @NotBlank(message = "invalid_request")
-        @Size(max = NICKNAME_MAX_LENGTH, message = "invalid_nickname")
+        @NotBlank(message = REQUIRED_FIELD)
+        @Size(max = NICKNAME_MAX_LENGTH, message = INVALID_NICKNAME)
         String nickname,
 
-        @Pattern(regexp = URL_PATTERN, message = "invalid_profile_image")
+        @Pattern(regexp = URL_PATTERN, message = INVALID_PROFILE_IMAGE)
         String profileImage
 ) {}
