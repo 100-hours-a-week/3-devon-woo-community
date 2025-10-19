@@ -5,9 +5,8 @@ import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRe
 import com.kakaotechbootcamp.community.application.post.dto.response.PostLikeResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostListResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
-import com.kakaotechbootcamp.community.application.post.service.PostCommandService;
 import com.kakaotechbootcamp.community.application.post.service.PostLikeCommandService;
-import com.kakaotechbootcamp.community.application.post.service.PostQueryService;
+import com.kakaotechbootcamp.community.application.post.service.PostService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,9 +18,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PostController {
 
-    private final PostCommandService postCommandService;
+    private final PostService postService;
     private final PostLikeCommandService postLikeCommandService;
-    private final PostQueryService postQueryService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -29,7 +27,7 @@ public class PostController {
             @RequestBody @Validated PostCreateRequest request
     ) {
         Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
-        PostResponse response = postCommandService.createPost(request, authorId);
+        PostResponse response = postService.createPost(request, authorId);
         return ApiResponse.success(response, "post_created");
     }
 
@@ -40,12 +38,12 @@ public class PostController {
             @RequestBody @Validated PostUpdateRequest request
     ) {
         Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
-        postCommandService.deletePost(postId, authorId);
+        postService.deletePost(postId, authorId);
     }
 
     @GetMapping("/{postId}")
     public ApiResponse<PostResponse> getPost(@PathVariable Long postId) {
-        PostResponse response = postQueryService.getPost(postId);
+        PostResponse response = postService.getPost(postId);
         return ApiResponse.success(response, "post_retrieved");
     }
 
@@ -54,7 +52,7 @@ public class PostController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        PostListResponse response = postQueryService.getPosts(page, size);
+        PostListResponse response = postService.getPosts(page, size);
         return ApiResponse.success(response, "posts_retrieved");
     }
 
