@@ -3,8 +3,9 @@ package com.kakaotechbootcamp.community.application.validator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.ErrorCode;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class AccessPolicyValidator {
 
     public void checkAccess(Long resourceAuthorId, Long requesterId) {
