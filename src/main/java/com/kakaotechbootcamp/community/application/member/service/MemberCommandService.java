@@ -3,6 +3,7 @@ package com.kakaotechbootcamp.community.application.member.service;
 import com.kakaotechbootcamp.community.application.member.dto.request.MemberUpdateRequest;
 import com.kakaotechbootcamp.community.application.member.dto.request.PasswordUpdateRequest;
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberUpdateResponse;
+import com.kakaotechbootcamp.community.application.member.validator.MemberValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.ErrorCode;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
@@ -15,55 +16,36 @@ import org.springframework.stereotype.Service;
 public class MemberCommandService {
 
     private final MemberRepository memberRepository;
+    private final MemberValidator memberValidator;
 
     public MemberUpdateResponse updateMember(Long id, MemberUpdateRequest request) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        validateUpdateRequest(request, member);
+        Member member = findMemberById(id);
+        memberValidator.checkUniqueNickname(request.nickname(), member);
 
         member.updateProfile(request.nickname(), request.profileImage());
-        Member savedMember = memberRepository.save(member);
 
-        return new MemberUpdateResponse(
-                savedMember.getNickname(),
-                savedMember.getProfileImageUrl()
-        );
+        memberRepository.save(member);
+
+        return MemberUpdateResponse.of(member);
     }
 
     public void updatePassword(Long id, PasswordUpdateRequest request) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Member member = findMemberById(id);
 
-        validatePasswordUpdate(request, member);
+        memberValidator.checkPasswordChangeAllowed(request, member);
 
         member.updatePassword(request.newPassword());
+
         memberRepository.save(member);
     }
 
     public void deleteMember(Long id) {
-        memberRepository.findById(id)
+        Member member = findMemberById(id);
+        memberRepository.deleteById(member.getId());
+    }
+
+    private Member findMemberById(Long id) {
+        return memberRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        memberRepository.deleteById(id);
     }
-
-    private void validateUpdateRequest(MemberUpdateRequest request, Member currentMember) {
-        if (request.nickname() != null && !request.nickname().equals(currentMember.getNickname())) {
-            if (memberRepository.existsByNickname(request.nickname())) {
-                throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
-            }
-        }
-    }
-
-    private void validatePasswordUpdate(PasswordUpdateRequest request, Member member) {
-        if (!request.currentPassword().equals(member.getPassword())) {
-            throw new CustomException(ErrorCode.INVALID_CURRENT_PASSWORD);
-        }
-
-        if (request.currentPassword().equals(request.newPassword())) {
-            throw new CustomException(ErrorCode.SAME_AS_CURRENT_PASSWORD);
-        }
-    }
-
 }
