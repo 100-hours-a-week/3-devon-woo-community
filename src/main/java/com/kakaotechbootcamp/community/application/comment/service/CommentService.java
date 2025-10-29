@@ -31,10 +31,10 @@ public class CommentService {
     private final AccessPolicyValidator accessPolicyValidator;
 
     public CommentResponse createComment(Long postId, CommentCreateRequest request, Long authorId) {
-        findPostById(postId);
+        Post post = findPostById(postId);
         Member author = findMemberById(authorId);
 
-        Comment comment = Comment.create(postId, authorId, request.content());
+        Comment comment = Comment.create(author, post, request.content());
         commentRepository.save(comment);
 
         return CommentResponse.of(comment, author);
@@ -42,9 +42,9 @@ public class CommentService {
 
     public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, Long requesterId) {
         Comment comment = findCommentById(commentId);
-        Member author = findMemberById(comment.getAuthorId());
+        Member author = comment.getAuthor();
 
-        accessPolicyValidator.checkAccess(comment.getAuthorId(), requesterId);
+        accessPolicyValidator.checkAccess(comment.getAuthor().getId(), requesterId);
 
         comment.updateContent(request.content());
         commentRepository.save(comment);
@@ -54,14 +54,14 @@ public class CommentService {
 
     public void deleteComment(Long commentId, Long requesterId) {
         Comment comment = findCommentById(commentId);
-        accessPolicyValidator.checkAccess(comment.getAuthorId(), requesterId);
+        accessPolicyValidator.checkAccess(comment.getAuthor().getId(), requesterId);
 
         commentRepository.deleteById(comment.getId());
     }
 
     public CommentResponse getComment(Long commentId) {
         Comment comment = findCommentById(commentId);
-        Member member = findMemberById(comment.getAuthorId());
+        Member member = comment.getAuthor();
 
         return CommentResponse.of(comment, member);
     }
@@ -71,16 +71,8 @@ public class CommentService {
 
         List<Comment> comments = commentRepository.findByPostId(postId);
 
-        List<Long> authorIds = comments.stream()
-                .map(Comment::getAuthorId)
-                .distinct()
-                .toList();
-
-        Map<Long, Member> memberMap = memberRepository.findAllById(authorIds).stream()
-                .collect(Collectors.toMap(Member::getId, Function.identity()));
-
         List<CommentResponse> commentResponses = comments.stream()
-                .map(comment -> CommentResponse.of(comment, memberMap.get(comment.getAuthorId())))
+                .map(comment -> CommentResponse.of(comment, comment.getAuthor()))
                 .toList();
 
         return CommentListResponse.of(postId, commentResponses, page, size);

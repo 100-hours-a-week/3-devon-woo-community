@@ -1,11 +1,11 @@
 package com.kakaotechbootcamp.community.domain.member.repository;
 
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
-import com.kakaotechbootcamp.community.infra.repository.CustomJpaRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface MemberRepository extends CustomJpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByEmail(String email);
 

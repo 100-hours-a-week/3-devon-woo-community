@@ -1,11 +1,11 @@
 package com.kakaotechbootcamp.community.domain.post.repository;
 
 import com.kakaotechbootcamp.community.domain.post.entity.Comment;
-import com.kakaotechbootcamp.community.infra.repository.CustomJpaRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface CommentRepository extends CustomJpaRepository<Comment, Long> {
+public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     long countByPostId(Long postId);
 
