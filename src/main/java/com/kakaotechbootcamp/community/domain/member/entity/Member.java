@@ -1,13 +1,18 @@
 package com.kakaotechbootcamp.community.domain.member.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 
+@Entity
 @Getter
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor
+@Table(name = "member")
 public class Member {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String email;

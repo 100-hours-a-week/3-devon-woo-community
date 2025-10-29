@@ -25,7 +25,7 @@ public record CommentResponse(
     public static CommentResponse of(Comment comment, Member member) {
         return new CommentResponse(
                 comment.getId(),
-                comment.getPostId(),
+                comment.getPost().getId(),
                 comment.getContent(),
                 MemberResponse.of(member),
                 comment.getCreatedAt(),

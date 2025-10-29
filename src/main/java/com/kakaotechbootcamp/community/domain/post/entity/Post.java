@@ -1,17 +1,25 @@
 package com.kakaotechbootcamp.community.domain.post.entity;
 
 import com.kakaotechbootcamp.community.domain.common.BaseEntity;
+import com.kakaotechbootcamp.community.domain.member.entity.Member;
+import jakarta.persistence.*;
 import lombok.*;
 
+@Entity
 @Getter
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor
+@Table(name = "post")
 public class Post extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long authorId;
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private Member author;
 
     private String title;
 
@@ -23,9 +31,9 @@ public class Post extends BaseEntity {
     @Builder.Default
     private Long likeCount = 0L;
 
-    public static Post create(Long authorId, String title, String content) {
+    public static Post create(Member author, String title, String content) {
         return Post.builder()
-                .authorId(authorId)
+                .author(author)
                 .title(title)
                 .content(content)
                 .viewsCount(0L)

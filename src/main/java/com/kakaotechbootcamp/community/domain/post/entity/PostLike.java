@@ -1,24 +1,34 @@
 package com.kakaotechbootcamp.community.domain.post.entity;
 
 import com.kakaotechbootcamp.community.domain.common.BaseEntity;
+import com.kakaotechbootcamp.community.domain.member.entity.Member;
+import jakarta.persistence.*;
 import lombok.*;
 
+@Entity
 @Getter
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor
+@Table(name = "post_like")
 public class PostLike extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long postId;
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
 
-    private Long memberId;
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 
-    public static PostLike create(Long postId, Long memberId) {
+    public static PostLike create(Post post, Member member) {
         return PostLike.builder()
-                .postId(postId)
-                .memberId(memberId)
+                .post(post)
+                .member(member)
                 .build();
     }
 }

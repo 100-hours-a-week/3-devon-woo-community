@@ -1,26 +1,36 @@
 package com.kakaotechbootcamp.community.domain.post.entity;
 
 import com.kakaotechbootcamp.community.domain.common.BaseEntity;
+import com.kakaotechbootcamp.community.domain.member.entity.Member;
+import jakarta.persistence.*;
 import lombok.*;
 
+@Entity
 @Getter
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor
+@Table(name = "comment")
 public class Comment extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long authorId;
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private Member author;
 
-    private Long postId;
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
 
     private String content;
 
-    public static Comment create(Long authorId, Long postId, String content) {
+    public static Comment create(Member author, Post post, String content) {
         return Comment.builder()
-                .authorId(authorId)
-                .postId(postId)
+                .author(author)
+                .post(post)
                 .content(content)
                 .build();
     }

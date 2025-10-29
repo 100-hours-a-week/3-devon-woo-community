@@ -37,9 +37,9 @@ public class PostService {
     public PostResponse createPost(PostCreateRequest request, Long authorId) {
         Member member = findMemberById(authorId);
 
-        Post post = Post.create(authorId, request.title(), request.content());
-        Attachment attachment = Attachment.create(post.getId(), request.image());
+        Post post = Post.create(member, request.title(), request.content());
         Post savedPost = postRepository.save(post);
+        Attachment attachment = Attachment.create(savedPost, request.image());
         Attachment savedAttachment = attachmentRepository.save(attachment);
 
         return PostResponse.of(savedPost, member, savedAttachment);
@@ -49,13 +49,13 @@ public class PostService {
         Post post = findPostById(postId);
         Member member = findMemberById(authorId);
 
-        accessPolicyValidator.checkAccess(post.getAuthorId(), authorId);
+        accessPolicyValidator.checkAccess(post.getAuthor().getId(), authorId);
 
         post.updatePost(request.title(), request.content());
         Post savedPost = postRepository.save(post);
 
         Attachment attachment = Optional.ofNullable(request.image())
-                .map(img -> attachmentRepository.save(Attachment.create(postId, img)))
+                .map(img -> attachmentRepository.save(Attachment.create(savedPost, img)))
                 .orElseGet(() -> attachmentRepository.findByPostId(postId).orElse(null));
 
         return PostResponse.of(savedPost, member, attachment);
@@ -63,14 +63,14 @@ public class PostService {
 
     public void deletePost(Long postId, Long authorId) {
         Post post = findPostById(postId);
-        accessPolicyValidator.checkAccess(post.getAuthorId(), authorId);
+        accessPolicyValidator.checkAccess(post.getAuthor().getId(), authorId);
 
         postRepository.deleteById(postId);
     }
 
     public PostResponse getPost(Long postId) {
         Post post = findPostById(postId);
-        Member member = findMemberById(post.getAuthorId());
+        Member member = post.getAuthor();
         Attachment attachment = attachmentRepository.findByPostId(postId)
                 .orElse(null);
 
@@ -83,28 +83,20 @@ public class PostService {
     public PostListResponse getPosts(int page, int size) {
         List<Post> posts = postRepository.findAll();
 
-        List<Long> authorIds = posts.stream()
-                .map(Post::getAuthorId)
-                .distinct()
-                .toList();
-
         List<Long> postIds = posts.stream()
                 .map(Post::getId)
                 .toList();
 
-        Map<Long, Member> memberMap = memberRepository.findAllById(authorIds).stream()
-                .collect(Collectors.toMap(Member::getId, Function.identity()));
-
         Map<Long, Long> commentCountMap = commentRepository.findByPostIdIn(postIds).stream()
                 .collect(Collectors.groupingBy(
-                        Comment::getPostId,
+                        comment -> comment.getPost().getId(),
                         Collectors.counting()
                 ));
 
         List<PostSummaryResponse> postSummaries = posts.stream()
                 .map(post -> PostSummaryResponse.of(
                         post,
-                        memberMap.get(post.getAuthorId()),
+                        post.getAuthor(),
                         commentCountMap.getOrDefault(post.getId(), 0L)
                 ))
                 .toList();
