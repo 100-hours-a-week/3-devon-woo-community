@@ -6,7 +6,7 @@ import com.kakaotechbootcamp.community.application.auth.dto.SignupRequest;
 import com.kakaotechbootcamp.community.application.auth.dto.SignupResponse;
 import com.kakaotechbootcamp.community.application.auth.validation.AuthValidationService;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
-import com.kakaotechbootcamp.community.common.exception.ErrorCode;
+import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request){
         Member member = memberRepository.findByEmail(request.email())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(MemberErrorCode.USER_NOT_FOUND));
 
         authValidationService.validatePassword(request.password(), member.getPassword());
 
