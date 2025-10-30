@@ -5,7 +5,7 @@ import com.kakaotechbootcamp.community.application.member.dto.request.PasswordUp
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberUpdateResponse;
 import com.kakaotechbootcamp.community.application.member.validator.MemberValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
-import com.kakaotechbootcamp.community.common.exception.ErrorCode;
+import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +46,6 @@ public class MemberCommandService {
 
     private Member findMemberById(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(MemberErrorCode.USER_NOT_FOUND));
     }
 }
