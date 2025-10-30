@@ -1,5 +1,7 @@
 package com.kakaotechbootcamp.community.domain.member.entity;
 
+import com.kakaotechbootcamp.community.common.exception.CustomException;
+import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -47,7 +49,7 @@ public class Member {
 
     public void updateProfile(String nickname, String profileImageUrl) {
         if (nickname == null && profileImageUrl == null) {
-            throw new IllegalArgumentException("업데이트할 프로필 정보가 없습니다.");
+            throw new CustomException(MemberErrorCode.MEMBER_NO_PROFILE_UPDATE_DATA);
         }
 
         if (nickname != null) {
@@ -73,16 +75,16 @@ public class Member {
 
     private void validateNickname(String nickname) {
         if (nickname == null || nickname.trim().isEmpty()) {
-            throw new IllegalArgumentException("닉네임은 필수입니다.");
+            throw new CustomException(MemberErrorCode.MEMBER_NICKNAME_REQUIRED);
         }
         if (nickname.length() > 10) {
-            throw new IllegalArgumentException("닉네임은 10자를 초과할 수 없습니다.");
+            throw new CustomException(MemberErrorCode.MEMBER_NICKNAME_TOO_LONG);
         }
     }
 
     private void validateProfileImageUrl(String profileImageUrl) {
         if (profileImageUrl != null && profileImageUrl.length() > 500) {
-            throw new IllegalArgumentException("프로필 이미지 URL은 500자를 초과할 수 없습니다.");
+            throw new CustomException(MemberErrorCode.MEMBER_PROFILE_IMAGE_URL_TOO_LONG);
         }
     }
 
