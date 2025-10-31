@@ -1,6 +1,5 @@
 package com.kakaotechbootcamp.community.infra.csv;
 
-import com.kakaotechbootcamp.community.domain.common.BaseEntity;
 import com.kakaotechbootcamp.community.infra.repository.CrudStorage;
 import lombok.extern.slf4j.Slf4j;
 
@@ -64,15 +63,6 @@ public class GenericCsvStorage<T, ID> implements CrudStorage<T, ID> {
 
             ID id = idExtractor.apply(entity);
             boolean isUpdate = id != null;
-
-            if (entity instanceof BaseEntity) {
-                BaseEntity baseEntity = (BaseEntity) entity;
-                if (!isUpdate) {
-                    baseEntity.onCreate();
-                } else {
-                    baseEntity.onUpdate();
-                }
-            }
 
             if (!isUpdate) {
                 id = generateNextId();

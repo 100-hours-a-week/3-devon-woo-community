@@ -5,7 +5,7 @@ import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.post.entity.Comment;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Schema(description = "댓글 응답 DTO")
 public record CommentResponse(
@@ -18,9 +18,9 @@ public record CommentResponse(
         @Schema(description = "작성자 정보")
         MemberResponse author,
         @Schema(description = "생성 시각")
-        LocalDateTime createdAt,
+        Instant createdAt,
         @Schema(description = "수정 시각")
-        LocalDateTime updatedAt
+        Instant updatedAt
 ) {
     public static CommentResponse of(Comment comment, Member member) {
         return new CommentResponse(
