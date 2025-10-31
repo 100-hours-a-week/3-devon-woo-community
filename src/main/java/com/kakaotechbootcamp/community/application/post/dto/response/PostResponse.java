@@ -6,7 +6,7 @@ import com.kakaotechbootcamp.community.domain.post.entity.Attachment;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Schema(description = "게시글 응답 DTO")
 public record PostResponse(
@@ -21,9 +21,9 @@ public record PostResponse(
         @Schema(description = "이미지 URL", example = "https://picsum.photos/200")
         String imageUrl,
         @Schema(description = "생성 시각")
-        LocalDateTime createdAt,
+        Instant createdAt,
         @Schema(description = "수정 시각")
-        LocalDateTime updatedAt,
+        Instant updatedAt,
         @Schema(description = "조회수", example = "100")
         Long views,
         @Schema(description = "좋아요 수", example = "10")
