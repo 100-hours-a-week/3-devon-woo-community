@@ -7,7 +7,7 @@ import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Schema(description = "게시글 요약 응답 DTO")
 public record PostSummaryResponse(
@@ -18,7 +18,7 @@ public record PostSummaryResponse(
         @Schema(description = "작성자 정보")
         MemberResponse author,
         @Schema(description = "생성 시각")
-        LocalDateTime createdAt,
+        Instant createdAt,
         @Schema(description = "조회수", example = "100")
         Long views,
         @Schema(description = "좋아요 수", example = "10")

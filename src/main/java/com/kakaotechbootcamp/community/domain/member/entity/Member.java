@@ -1,17 +1,16 @@
 package com.kakaotechbootcamp.community.domain.member.entity;
 
-import com.kakaotechbootcamp.community.common.exception.CustomException;
-import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.util.Assert;
 
 import java.time.Instant;
 
 @Entity
 @Getter
-@Builder(toBuilder = true)
+@Builder(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "member")
 public class Member {
 
@@ -19,104 +18,79 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password", length = 20)
+    @Column(name = "password", length = 20, nullable = false)
     private String password;
 
-    @Column(name = "nickname", length = 10)
+    @Column(name = "nickname", length = 10, nullable = false)
     private String nickname;
 
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
-    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
     private MemberStatus status;
 
     @Column(name = "last_login_at")
     private Instant lastLoginAt;
 
-    public static Member create(String email, String password, String nickname, String profileImageUrl) {
+    public static Member create(String email, String password, String nickname) {
+        validateCreate(email, password, nickname);
         return Member.builder()
                 .email(email)
                 .password(password)
                 .nickname(nickname)
-                .profileImageUrl(profileImageUrl)
                 .status(MemberStatus.ACTIVE)
                 .build();
     }
 
-    public void updateProfile(String nickname, String profileImageUrl) {
-        if (nickname == null && profileImageUrl == null) {
-            throw new CustomException(MemberErrorCode.MEMBER_NO_PROFILE_UPDATE_DATA);
+    public void changeNickname(String nickname) {
+        Assert.hasText(nickname, "nickname required");
+        if (nickname.length() > 10) {
+            throw new IllegalArgumentException("nickname too long");
         }
-
-        if (nickname != null) {
-            validateNickname(nickname);
-            this.nickname = nickname;
-        }
-
-        if (profileImageUrl != null) {
-            validateProfileImageUrl(profileImageUrl);
-            this.profileImageUrl = profileImageUrl;
-        }
-    }
-
-    public void updateNickname(String nickname) {
-        validateNickname(nickname);
         this.nickname = nickname;
     }
 
-    public void updateProfileImage(String profileImageUrl) {
-        validateProfileImageUrl(profileImageUrl);
-        this.profileImageUrl = profileImageUrl;
-    }
-
-    private void validateNickname(String nickname) {
-        if (nickname == null || nickname.trim().isEmpty()) {
-            throw new CustomException(MemberErrorCode.MEMBER_NICKNAME_REQUIRED);
+    public void updateProfileImage(String url) {
+        if (url != null && url.length() > 500) {
+            throw new IllegalArgumentException("url too long");
         }
-        if (nickname.length() > 10) {
-            throw new CustomException(MemberErrorCode.MEMBER_NICKNAME_TOO_LONG);
+        this.profileImageUrl = url;
+    }
+
+    public void changePassword(String password) {
+        Assert.hasText(password, "password required");
+        if (password.length() > 20) {
+            throw new IllegalArgumentException("password too long");
         }
+        this.password = password;
     }
 
-    private void validateProfileImageUrl(String profileImageUrl) {
-        if (profileImageUrl != null && profileImageUrl.length() > 500) {
-            throw new CustomException(MemberErrorCode.MEMBER_PROFILE_IMAGE_URL_TOO_LONG);
-        }
-    }
-
-    public void updatePassword(String newPassword) {
-        this.password = newPassword;
-    }
-
-    public void updateLastLoginTime() {
+    public void loginSuccess() {
         this.lastLoginAt = Instant.now();
     }
 
-    public void deactivate() {
-        this.status = MemberStatus.INACTIVE;
-    }
+    public void deactivate() { this.status = MemberStatus.INACTIVE; }
 
-    public void reactivate() {
-        this.status = MemberStatus.ACTIVE;
-    }
+    public void withdraw() { this.status = MemberStatus.WITHDRAWN; }
 
-    public void withdraw() {
-        this.status = MemberStatus.WITHDRAWN;
-    }
+    public boolean isActive() { return this.status == MemberStatus.ACTIVE; }
 
-    public boolean isActive() {
-        return this.status == MemberStatus.ACTIVE;
-    }
 
-    public boolean isWithdrawn() {
-        return this.status == MemberStatus.WITHDRAWN;
-    }
+    private static void validateCreate(String email, String password, String nickname){
+        Assert.hasText(email, "email required");
+        Assert.hasText(password, "password required");
+        Assert.hasText(nickname, "nickname required");
 
-    public boolean canLogin() {
-        return this.status == MemberStatus.ACTIVE;
+        if (password.length() > 20) {
+            throw new IllegalArgumentException("password too long");
+        }
+        if (nickname.length() > 10) {
+            throw new IllegalArgumentException("nickname too long");
+        }
     }
 }
