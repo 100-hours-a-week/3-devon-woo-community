@@ -24,9 +24,10 @@ public class AuthService {
         Member member = Member.create(
                 request.email(),
                 request.password(),
-                request.nickname(),
-                request.profileImage()
+                request.nickname()
         );
+
+        member.updateProfileImage(request.profileImage());
 
         Member savedMember = memberRepository.save(member);
         return new SignupResponse(savedMember.getId());
