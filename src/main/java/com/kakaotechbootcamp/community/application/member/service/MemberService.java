@@ -26,7 +26,7 @@ public class MemberService {
         memberValidator.checkUniqueNickname(request.nickname(), member);
 
         member.changeNickname(request.nickname());
-        member.changeProfileImage(request.profileImage());
+        member.updateProfileImage(request.profileImage());
 
         memberRepository.save(member);
 

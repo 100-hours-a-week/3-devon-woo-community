@@ -55,7 +55,7 @@ public class Member {
         this.nickname = nickname;
     }
 
-    public void changeProfileImage(String url) {
+    public void updateProfileImage(String url) {
         if (url != null && url.length() > 500) {
             throw new IllegalArgumentException("url too long");
         }
