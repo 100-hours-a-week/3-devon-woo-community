@@ -1,31 +1,29 @@
 package com.kakaotechbootcamp.community.domain.common;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
-import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 모든 엔티티의 기본 클래스
  * 공통 필드인 생성/수정 시간 관리
  */
 @Getter
-@Setter
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
-    public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public boolean isNew() {
-        return this.createdAt == null;
-    }
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 }
