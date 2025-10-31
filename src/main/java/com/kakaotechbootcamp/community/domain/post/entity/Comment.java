@@ -4,12 +4,13 @@ import com.kakaotechbootcamp.community.domain.common.BaseEntity;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.util.Assert;
 
 @Entity
 @Getter
-@Builder(toBuilder = true)
+@Builder(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "comment")
 public class Comment extends BaseEntity {
 
@@ -17,25 +18,49 @@ public class Comment extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id")
-    private Member author;
-
-    @ManyToOne
-    @JoinColumn(name = "post_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    private Member author;
+
+    @Column(name = "content", columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted;
+
     public static Comment create(Member author, Post post, String content) {
+        Assert.notNull(author, "author required");
+        Assert.notNull(post, "post required");
+        Assert.hasText(content, "content required");
+
         return Comment.builder()
                 .author(author)
                 .post(post)
                 .content(content)
+                .isDeleted(false)
                 .build();
     }
 
     public void updateContent(String content) {
-        this.content = content != null ? content : this.content;
+        if (content != null) {
+            Assert.hasText(content, "content required");
+            this.content = content;
+        }
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+    }
+
+    public void restore() {
+        this.isDeleted = false;
+    }
+
+    public boolean isDeleted() {
+        return this.isDeleted;
     }
 }
