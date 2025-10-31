@@ -30,8 +30,7 @@ class PersistenceContextVsJpqlTest {
         Member member = Member.create(
                 "test@example.com",
                 "password123",
-                "아이언맨",
-                "http://example.com/profile.jpg"
+                "아이언맨"
         );
         memberRepository.save(member);
         entityManager.flush(); // DB에 반영
@@ -47,7 +46,7 @@ class PersistenceContextVsJpqlTest {
         Member foundMember = memberRepository.findById(memberId).orElseThrow();
         System.out.println("조회 직후 닉네임: " + foundMember.getNickname());
 
-        foundMember.updateNickname("로키");
+        foundMember.changeNickname("로키");
         System.out.println("영속성 컨텍스트에서 변경 후: " + foundMember.getNickname());
         System.out.println("(아직 flush 하지 않음 - DB에는 반영 안됨)");
 
@@ -96,8 +95,7 @@ class PersistenceContextVsJpqlTest {
         Member member = Member.create(
                 "test2@example.com",
                 "password123",
-                "헐크",
-                "http://example.com/profile2.jpg"
+                "헐크"
         );
         memberRepository.save(member);
         entityManager.flush();
@@ -110,7 +108,7 @@ class PersistenceContextVsJpqlTest {
         // When: 1단계 - 영속성 컨텍스트로 '로키'로 변경 + flush
         System.out.println("\n========== 1단계: 영속성 컨텍스트로 '로키'로 변경 + flush ==========");
         Member foundMember = memberRepository.findById(memberId).orElseThrow();
-        foundMember.updateNickname("로키");
+        foundMember.changeNickname("로키");
         entityManager.flush(); // DB에 반영!
         System.out.println("flush 후 영속성 컨텍스트 닉네임: " + foundMember.getNickname());
 
@@ -147,8 +145,7 @@ class PersistenceContextVsJpqlTest {
         Member member = Member.create(
                 "test3@example.com",
                 "password123",
-                "캡틴아메리카",
-                "http://example.com/profile3.jpg"
+                "캡틴아메리카"
         );
         memberRepository.save(member);
         entityManager.flush();
@@ -165,7 +162,7 @@ class PersistenceContextVsJpqlTest {
         Member foundMember = memberRepository.findById(memberId).orElseThrow();
         System.out.println("조회 직후 닉네임: " + foundMember.getNickname());
 
-        foundMember.updateNickname("로키");
+        foundMember.changeNickname("로키");
         System.out.println("영속성 컨텍스트에서 변경 후: " + foundMember.getNickname());
         System.out.println("(아직 flush 하지 않음 - DB에는 반영 안됨)");
 
@@ -228,8 +225,7 @@ class PersistenceContextVsJpqlTest {
         Member member = Member.create(
                 "test4@example.com",
                 "password123",
-                "블랙위도우",
-                "http://example.com/profile4.jpg"
+                "블랙위도우"
         );
         memberRepository.save(member);
         entityManager.flush();
@@ -246,7 +242,7 @@ class PersistenceContextVsJpqlTest {
         Member foundMember = memberRepository.findById(memberId).orElseThrow();
         System.out.println("조회 직후 닉네임: " + foundMember.getNickname());
 
-        foundMember.updateNickname("로키");
+        foundMember.changeNickname("로키");
         System.out.println("영속성 컨텍스트에서 변경 후: " + foundMember.getNickname());
 
         // When: 2단계 - FlushMode를 COMMIT으로 설정하고 JPQL로 '토르'로 변경
