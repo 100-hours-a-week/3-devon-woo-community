@@ -13,36 +13,47 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class MemberCommandService {
+public class MemberService {
 
     private final MemberRepository memberRepository;
     private final MemberValidator memberValidator;
 
+    /**
+     * 회원 정보 수정
+     */
     public MemberUpdateResponse updateMember(Long id, MemberUpdateRequest request) {
         Member member = findMemberById(id);
         memberValidator.checkUniqueNickname(request.nickname(), member);
 
-        member.updateProfile(request.nickname(), request.profileImage());
+        member.changeNickname(request.nickname());
+        member.changeProfileImage(request.profileImage());
 
         memberRepository.save(member);
 
         return MemberUpdateResponse.of(member);
     }
 
+    /**
+     * 회원 비밀 번호 검증 및 변경
+     */
     public void updatePassword(Long id, PasswordUpdateRequest request) {
         Member member = findMemberById(id);
 
         memberValidator.checkPasswordChangeAllowed(request, member);
 
-        member.updatePassword(request.newPassword());
+        member.changePassword(request.newPassword());
 
         memberRepository.save(member);
     }
 
+    /**
+     * 회원 탈퇴
+     */
     public void deleteMember(Long id) {
         Member member = findMemberById(id);
         memberRepository.deleteById(member.getId());
     }
+
 
     private Member findMemberById(Long id) {
         return memberRepository.findById(id)
