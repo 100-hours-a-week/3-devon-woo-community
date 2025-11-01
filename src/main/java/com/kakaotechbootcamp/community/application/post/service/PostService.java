@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ public class PostService {
     /**
      * 게시글 생성
      */
+    @Transactional
     public PostResponse createPost(PostCreateRequest request, Long memberId) {
         Member member = findMemberById(memberId);
 
@@ -53,6 +55,7 @@ public class PostService {
     /**
      * 게시글 수정
      */
+    @Transactional
     public PostResponse updatePost(Long postId, PostUpdateRequest request, Long memberId) {
         Post post = findByIdWithMember(postId);
         Member member = findMemberById(memberId);
@@ -72,6 +75,7 @@ public class PostService {
     /**
      * 게시글 삭제
      */
+    @Transactional
     public void deletePost(Long postId, Long memberId) {
         Post post = findByIdWithMember(postId);
         accessPolicyValidator.checkAccess(post.getMember().getId(), memberId);
@@ -82,6 +86,7 @@ public class PostService {
     /**
      * 게시글 조회
      */
+    @Transactional(readOnly = true)
     public PostResponse getPostDetails(Long postId) {
         Post post = findByIdWithMember(postId);
 
@@ -98,6 +103,7 @@ public class PostService {
     /**
      * 게시글 페이지 조회 (+페이징 및 정렬)
      */
+    @Transactional(readOnly = true)
     public PageResponse<PostSummaryResponse> getPostPage(Pageable pageable) {
         Page<PostSummaryDto> postDtoPage = postRepository.findAllActiveWithMemberAsDto(pageable);
 

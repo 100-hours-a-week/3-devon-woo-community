@@ -13,6 +13,7 @@ import com.kakaotechbootcamp.community.domain.post.repository.PostLikeRepository
 import com.kakaotechbootcamp.community.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class PostLikeService {
     private final MemberRepository memberRepository;
     private final PostLikePolicyValidator postLikePolicyValidator;
 
+    @Transactional
     public PostLikeResponse likePost(Long postId, Long memberId) {
         Post post = findPostById(postId);
         Member member = findMemberById(memberId);
@@ -35,6 +37,7 @@ public class PostLikeService {
         return PostLikeResponse.of(postId, post.getLikeCount());
     }
 
+    @Transactional
     public PostLikeResponse unlikePost(Long postId, Long memberId) {
         Post post = findPostById(postId);
         postLikePolicyValidator.checkLikeExists(postId, memberId);

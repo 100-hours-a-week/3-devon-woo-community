@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class CommentService {
     /**
      * 댓글 작성
      */
+    @Transactional
     public CommentResponse createComment(Long postId, CommentCreateRequest request, Long memberId) {
         Post post = findPostById(postId);
         Member member = findMemberById(memberId);
@@ -48,6 +50,7 @@ public class CommentService {
     /**
      * 댓글 업데이튼
      */
+    @Transactional
     public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, Long requesterId) {
         Comment comment = findCommentById(commentId);
         Member member = comment.getMember();
@@ -63,6 +66,7 @@ public class CommentService {
     /**
      * 댓글 삭제
      */
+    @Transactional
     public void deleteComment(Long commentId, Long requesterId) {
         Comment comment = findCommentById(commentId);
         accessPolicyValidator.checkAccess(comment.getMember().getId(), requesterId);
@@ -73,6 +77,7 @@ public class CommentService {
     /**
      * 댓글 살세 조회
      */
+    @Transactional(readOnly = true)
     public CommentResponse getCommentsDetails(Long commentId) {
         Comment comment = findCommentById(commentId);
         Member member = comment.getMember();
@@ -83,6 +88,7 @@ public class CommentService {
     /**
      * 게시글의 댓글 페이지 조회 (+페이징 및 정렬)
      */
+    @Transactional(readOnly = true)
     public PageResponse<CommentResponse> getCommentPageByPostId(Long postId, Pageable pageable) {
         findPostById(postId);
 
