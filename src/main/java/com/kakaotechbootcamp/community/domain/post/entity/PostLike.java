@@ -1,29 +1,45 @@
 package com.kakaotechbootcamp.community.domain.post.entity;
 
-import com.kakaotechbootcamp.community.domain.common.BaseEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.kakaotechbootcamp.community.domain.common.entity.BaseTimeEntity;
+import com.kakaotechbootcamp.community.domain.common.entity.CreatedOnlyEntity;
+import com.kakaotechbootcamp.community.domain.member.entity.Member;
+import com.kakaotechbootcamp.community.domain.post.entity.id.PostLikeId;
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.util.Assert;
 
+@Entity
 @Getter
-@Setter
-@Builder(toBuilder = true)
-@AllArgsConstructor
-@NoArgsConstructor
-public class PostLike extends BaseEntity {
+@Builder(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "post_like")
+public class PostLike extends CreatedOnlyEntity {
 
-    private Long id;
+    @EmbeddedId
+    private PostLikeId id;
 
-    private Long postId;
+    @MapsId("postId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
-    private Long memberId;
+    @MapsId("memberId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
-    public static PostLike create(Long postId, Long memberId) {
+    public static PostLike create(Post post, Member member) {
+        validateCreate(post, member);
         return PostLike.builder()
-                .postId(postId)
-                .memberId(memberId)
+                .id(PostLikeId.create(post.getId(), member.getId()))
+                .post(post)
+                .member(member)
                 .build();
+    }
+
+    private static void validateCreate(Post post, Member member) {
+        Assert.notNull(post, "post required");
+        Assert.notNull(member, "member required");
     }
 }

@@ -1,58 +1,96 @@
 package com.kakaotechbootcamp.community.application.post.service;
 
+import com.kakaotechbootcamp.community.application.common.dto.response.PageResponse;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostCreateRequest;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRequest;
-import com.kakaotechbootcamp.community.application.post.dto.response.PostLikeResponse;
-import com.kakaotechbootcamp.community.application.post.dto.response.PostListResponse;
-import com.kakaotechbootcamp.community.application.post.dto.response.PostSummaryResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
+import com.kakaotechbootcamp.community.application.post.dto.response.PostSummaryResponse;
+import com.kakaotechbootcamp.community.domain.post.dto.PostQueryDto;
+import com.kakaotechbootcamp.community.application.common.validator.AccessPolicyValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
-import com.kakaotechbootcamp.community.common.exception.ErrorCode;
+import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
+import com.kakaotechbootcamp.community.common.exception.code.PostErrorCode;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
 import com.kakaotechbootcamp.community.domain.post.entity.Attachment;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
-import com.kakaotechbootcamp.community.domain.post.entity.PostLike;
 import com.kakaotechbootcamp.community.domain.post.repository.AttachmentRepository;
 import com.kakaotechbootcamp.community.domain.post.repository.CommentRepository;
-import com.kakaotechbootcamp.community.domain.post.repository.PostLikeRepository;
 import com.kakaotechbootcamp.community.domain.post.repository.PostRepository;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
-
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final AttachmentRepository attachmentRepository;
     private final CommentRepository commentRepository;
-    private final PostLikeRepository postLikeRepository;
+    private final AccessPolicyValidator accessPolicyValidator;
 
-    public PostResponse createPost(PostCreateRequest request, Long authorId) {
-        Member member = memberRepository.findById(authorId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Post post = Post.create(authorId, request.title(), request.content());
-        Attachment attachment = Attachment.create(post.getId(), request.image());
+    /**
+     * 게시글 생성
+     */
+    @Transactional
+    public PostResponse createPost(PostCreateRequest request, Long memberId) {
+        Member member = findMemberById(memberId);
+
+        Post post = Post.create(member, request.title(), request.content());
         Post savedPost = postRepository.save(post);
+        Attachment attachment = Attachment.create(savedPost, request.image());
         Attachment savedAttachment = attachmentRepository.save(attachment);
 
         return PostResponse.of(savedPost, member, savedAttachment);
     }
 
-    public PostResponse getPost(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-        Member member = memberRepository.findById(post.getAuthorId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    /**
+     * 게시글 수정
+     */
+    @Transactional
+    public PostResponse updatePost(Long postId, PostUpdateRequest request, Long memberId) {
+        Post post = findByIdWithMember(postId);
+        Member member = findMemberById(memberId);
+
+        accessPolicyValidator.checkAccess(post.getMember().getId(), memberId);
+
+        post.updatePost(request.title(), request.content());
+        Post savedPost = postRepository.save(post);
+
+        Attachment attachment = Optional.ofNullable(request.image())
+                .map(img -> attachmentRepository.save(Attachment.create(savedPost, img)))
+                .orElseGet(() -> attachmentRepository.findByPostId(postId).orElse(null));
+
+        return PostResponse.of(savedPost, member, attachment);
+    }
+
+    /**
+     * 게시글 삭제
+     */
+    @Transactional
+    public void deletePost(Long postId, Long memberId) {
+        Post post = findByIdWithMember(postId);
+        accessPolicyValidator.checkAccess(post.getMember().getId(), memberId);
+
+        postRepository.deleteById(postId);
+    }
+
+    /**
+     * 게시글 조회
+     */
+    @Transactional(readOnly = true)
+    public PostResponse getPostDetails(Long postId) {
+        Post post = findByIdWithMember(postId);
+
+        Member member = post.getMember();
         Attachment attachment = attachmentRepository.findByPostId(postId)
                 .orElse(null);
 
@@ -62,103 +100,34 @@ public class PostService {
         return PostResponse.of(post, member, attachment);
     }
 
-    public PostListResponse getPosts(int page, int size) {
-        List<Post> posts = postRepository.findAll();
+    /**
+     * 게시글 페이지 조회 (+페이징 및 정렬)
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<PostSummaryResponse> getPostPage(Pageable pageable) {
+        Page<PostQueryDto> postDtoPage = postRepository.findAllActiveWithMemberAsDto(pageable);
 
-        List<Long> authorIds = posts.stream()
-                .map(Post::getAuthorId)
-                .distinct()
+        List<PostQueryDto> postDtos = postDtoPage.getContent();
+        List<Long> postIds = postDtos.stream()
+                .map(PostQueryDto::postId)
                 .toList();
 
-        Map<Long, Member> memberMap = memberRepository.findAllById(authorIds).stream()
-                .collect(Collectors.toMap(Member::getId, Function.identity()));
+        Map<Long, Long> commentCountMap = commentRepository.countCommentsByPostIds(postIds);
 
-        Map<Long, Long> commentCountMap = posts.stream()
-                .collect(Collectors.toMap(
-                        Post::getId,
-                        post -> commentRepository.countByPostId(post.getId())
-                ));
-
-        List<PostSummaryResponse> postSummaries = posts.stream()
-                .map(post -> PostSummaryResponse.of(
-                        post,
-                        memberMap.get(post.getAuthorId()),
-                        commentCountMap.getOrDefault(post.getId(), 0L)
-                ))
+        List<PostSummaryResponse> postSummaries = postDtos.stream()
+                .map(dto -> PostSummaryResponse.fromDto(dto, commentCountMap.getOrDefault(dto.postId(), 0L)))
                 .toList();
 
-        return PostListResponse.of(postSummaries, page, size);
+        return PageResponse.of(postSummaries, postDtoPage);
     }
 
-    public PostResponse updatePost(Long postId, PostUpdateRequest request, Long authorId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-        Member member = memberRepository.findById(post.getAuthorId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        validateAuthor(post, authorId);
-
-        post.updatePost(request.title(), request.content());
-        Post savedPost = postRepository.save(post);
-
-        Attachment attachment = Optional.ofNullable(request.image())
-                .map(img -> attachmentRepository.save(Attachment.create(postId, img)))
-                .orElseGet(() -> attachmentRepository.findByPostId(postId).orElse(null));
-
-        return PostResponse.of(savedPost, member, attachment);
+    private Post findByIdWithMember(Long postId) {
+        return postRepository.findByIdWithMember(postId)
+                .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
     }
 
-    public void deletePost(Long postId, Long authorId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-
-        validateAuthor(post, authorId);
-
-        postRepository.deleteById(postId);
+    private Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.USER_NOT_FOUND));
     }
-
-    public PostLikeResponse likePost(Long postId, Long memberId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-
-        // 이미 좋아요를 눌렀는지 확인
-        if (postLikeRepository.existsByPostIdAndMemberId(postId, memberId)) {
-            throw new CustomException(ErrorCode.ALREADY_LIKED);
-        }
-
-        // PostLike 엔티티 생성 및 저장
-        PostLike postLike = PostLike.create(postId, memberId);
-        postLikeRepository.save(postLike);
-
-        // 좋아요 수 증가
-        post.incrementLikes();
-        postRepository.save(post);
-
-        return PostLikeResponse.of(postId, post.getLikeCount());
-    }
-
-    public PostLikeResponse unlikePost(Long postId, Long memberId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-
-        // 좋아요를 눌렀는지 확인
-        if (!postLikeRepository.existsByPostIdAndMemberId(postId, memberId)) {
-            throw new CustomException(ErrorCode.LIKE_NOT_FOUND);
-        }
-
-        // PostLike 엔티티 삭제
-        postLikeRepository.deleteByPostIdAndMemberId(postId, memberId);
-
-        // 좋아요 수 감소
-        post.decrementLikes();
-        postRepository.save(post);
-
-        return PostLikeResponse.of(postId, post.getLikeCount());
-    }
-
-    private void validateAuthor(Post post, Long authorId) {
-        if (!post.getAuthorId().equals(authorId)) {
-            throw new CustomException(ErrorCode.NO_PERMISSION);
-        }
-    }
-
 }

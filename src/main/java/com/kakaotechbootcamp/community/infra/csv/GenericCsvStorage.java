@@ -1,6 +1,5 @@
 package com.kakaotechbootcamp.community.infra.csv;
 
-import com.kakaotechbootcamp.community.domain.common.BaseEntity;
 import com.kakaotechbootcamp.community.infra.repository.CrudStorage;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,8 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Function;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * CSV 파일 기반 제네릭 저장소
@@ -64,15 +63,6 @@ public class GenericCsvStorage<T, ID> implements CrudStorage<T, ID> {
 
             ID id = idExtractor.apply(entity);
             boolean isUpdate = id != null;
-
-            if (entity instanceof BaseEntity) {
-                BaseEntity baseEntity = (BaseEntity) entity;
-                if (!isUpdate) {
-                    baseEntity.onCreate();
-                } else {
-                    baseEntity.onUpdate();
-                }
-            }
 
             if (!isUpdate) {
                 id = generateNextId();

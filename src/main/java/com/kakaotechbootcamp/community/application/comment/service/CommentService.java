@@ -2,23 +2,27 @@ package com.kakaotechbootcamp.community.application.comment.service;
 
 import com.kakaotechbootcamp.community.application.comment.dto.request.CommentCreateRequest;
 import com.kakaotechbootcamp.community.application.comment.dto.request.CommentUpdateRequest;
-import com.kakaotechbootcamp.community.application.comment.dto.response.CommentListResponse;
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentResponse;
+import com.kakaotechbootcamp.community.application.common.dto.response.PageResponse;
+import com.kakaotechbootcamp.community.application.common.validator.AccessPolicyValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
-import com.kakaotechbootcamp.community.common.exception.ErrorCode;
+import com.kakaotechbootcamp.community.common.exception.code.CommentErrorCode;
+import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
+import com.kakaotechbootcamp.community.common.exception.code.PostErrorCode;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
+import com.kakaotechbootcamp.community.domain.post.dto.CommentQueryDto;
 import com.kakaotechbootcamp.community.domain.post.entity.Comment;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import com.kakaotechbootcamp.community.domain.post.repository.CommentRepository;
 import com.kakaotechbootcamp.community.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,81 +31,87 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
+    private final AccessPolicyValidator accessPolicyValidator;
 
-    public CommentResponse createComment(Long postId, CommentCreateRequest request, Long authorId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-        Member member = memberRepository.findById(authorId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    /**
+     * 댓글 작성
+     */
+    @Transactional
+    public CommentResponse createComment(Long postId, CommentCreateRequest request, Long memberId) {
+        Post post = findPostById(postId);
+        Member member = findMemberById(memberId);
 
-        Comment comment = Comment.create(postId, authorId, request.content());
-        Comment savedComment = commentRepository.save(comment);
-
-        return CommentResponse.of(savedComment, member);
-    }
-
-    public CommentResponse getComment(Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
-        Member member = memberRepository.findById(comment.getAuthorId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Comment comment = Comment.create(member, post, request.content());
+        commentRepository.save(comment);
 
         return CommentResponse.of(comment, member);
     }
 
-    public CommentListResponse getCommentsByPostId(Long postId, int page, int size) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+    /**
+     * 댓글 업데이튼
+     */
+    @Transactional
+    public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, Long requesterId) {
+        Comment comment = findCommentByIdWithMember(commentId);
+        Member member = comment.getMember();
 
-        List<Comment> comments = commentRepository.findByPostId(postId);
-
-        List<Long> authorIds = comments.stream()
-                .map(Comment::getAuthorId)
-                .distinct()
-                .toList();
-
-        Map<Long, Member> memberMap = memberRepository.findAllById(authorIds).stream()
-                .collect(Collectors.toMap(Member::getId, Function.identity()));
-
-        List<CommentResponse> commentResponses = comments.stream()
-                .map(comment -> {
-                    Member member = memberMap.get(comment.getAuthorId());
-                    if (member == null) {
-                        throw new CustomException(ErrorCode.USER_NOT_FOUND);
-                    }
-                    return CommentResponse.of(comment, member);
-                })
-                .toList();
-
-        return CommentListResponse.of(postId, commentResponses, page, size);
-    }
-
-    public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, Long authorId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
-        Member member = memberRepository.findById(comment.getAuthorId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        validateAuthor(comment, authorId);
+        accessPolicyValidator.checkAccess(comment.getMember().getId(), requesterId);
 
         comment.updateContent(request.content());
-        Comment savedComment = commentRepository.save(comment);
+        commentRepository.save(comment);
 
-        return CommentResponse.of(savedComment, member);
+        return CommentResponse.of(comment, member);
     }
 
-    public void deleteComment(Long commentId, Long authorId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+    /**
+     * 댓글 삭제
+     */
+    @Transactional
+    public void deleteComment(Long commentId, Long requesterId) {
+        Comment comment = findCommentByIdWithMember(commentId);
+        accessPolicyValidator.checkAccess(comment.getMember().getId(), requesterId);
 
-        validateAuthor(comment, authorId);
-
-        commentRepository.deleteById(commentId);
+        commentRepository.deleteById(comment.getId());
     }
 
-    private void validateAuthor(Comment comment, Long authorId) {
-        if (!comment.getAuthorId().equals(authorId)) {
-            throw new CustomException(ErrorCode.NO_PERMISSION);
-        }
+    /**
+     * 댓글 살세 조회
+     */
+    @Transactional(readOnly = true)
+    public CommentResponse getCommentsDetails(Long commentId) {
+        Comment comment = findCommentByIdWithMember(commentId);
+
+        return CommentResponse.of(comment, comment.getMember());
+    }
+
+    /**
+     * 게시글의 댓글 페이지 조회 (+페이징 및 정렬)
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<CommentResponse> getCommentPageByPostId(Long postId, Pageable pageable) {
+        findPostById(postId);
+
+        Page<CommentQueryDto> commentDtoPage = commentRepository.findByPostIdWithMemberAsDto(postId, pageable);
+
+        List<CommentResponse> commentResponses = commentDtoPage.getContent().stream()
+                .map(CommentResponse::of)
+                .toList();
+
+        return PageResponse.of(commentResponses, commentDtoPage);
+    }
+
+    private Post findPostById(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
+    }
+
+    private Comment findCommentByIdWithMember(Long commentId) {
+        return commentRepository.findByIdWithMember(commentId)
+                .orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
+    }
+
+    private Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.USER_NOT_FOUND));
     }
 }

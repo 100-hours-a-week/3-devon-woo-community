@@ -1,13 +1,11 @@
 package com.kakaotechbootcamp.community.domain.post.repository;
 
 import com.kakaotechbootcamp.community.domain.post.entity.PostLike;
-import com.kakaotechbootcamp.community.infra.repository.CustomJpaRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface PostLikeRepository extends CustomJpaRepository<PostLike, Long> {
-
-    Optional<PostLike> findByPostIdAndMemberId(Long postId, Long memberId);
+public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
     boolean existsByPostIdAndMemberId(Long postId, Long memberId);
 

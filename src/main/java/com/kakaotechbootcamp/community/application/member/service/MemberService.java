@@ -2,68 +2,75 @@ package com.kakaotechbootcamp.community.application.member.service;
 
 import com.kakaotechbootcamp.community.application.member.dto.request.MemberUpdateRequest;
 import com.kakaotechbootcamp.community.application.member.dto.request.PasswordUpdateRequest;
+import com.kakaotechbootcamp.community.application.member.dto.response.MemberResponse;
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberUpdateResponse;
+import com.kakaotechbootcamp.community.application.member.validator.MemberValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
-import com.kakaotechbootcamp.community.common.exception.ErrorCode;
+import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final MemberValidator memberValidator;
 
-    public MemberUpdateResponse updateMember(Long id, MemberUpdateRequest request) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        validateUpdateRequest(request, member);
-
-        member.updateProfile(request.nickname(), request.profileImage());
-        Member savedMember = memberRepository.save(member);
-
-        return new MemberUpdateResponse(
-                savedMember.getNickname(),
-                savedMember.getProfileImageUrl()
-        );
+    /**
+     * 회원 프로필 조회
+     */
+    @Transactional(readOnly = true)
+    public MemberResponse getMemberProfile(Long id) {
+        Member member = findMemberById(id);
+        return MemberResponse.of(member);
     }
 
+    /**
+     * 회원 정보 수정
+     */
+    @Transactional
+    public MemberUpdateResponse updateMember(Long id, MemberUpdateRequest request) {
+        Member member = findMemberById(id);
+        memberValidator.checkUniqueNickname(request.nickname(), member);
+
+        member.changeNickname(request.nickname());
+        member.updateProfileImage(request.profileImage());
+
+        memberRepository.save(member);
+
+        return MemberUpdateResponse.of(member);
+    }
+
+    /**
+     * 회원 비밀 번호 검증 및 변경
+     */
+    @Transactional
     public void updatePassword(Long id, PasswordUpdateRequest request) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Member member = findMemberById(id);
 
-        validatePasswordUpdate(request, member);
+        memberValidator.checkPasswordChangeAllowed(request, member);
 
-        member.updatePassword(request.newPassword());
+        member.changePassword(request.newPassword());
+
         memberRepository.save(member);
     }
 
+    /**
+     * 회원 탈퇴
+     */
+    @Transactional
     public void deleteMember(Long id) {
-        memberRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        memberRepository.deleteById(id);
+        Member member = findMemberById(id);
+        memberRepository.deleteById(member.getId());
     }
 
-    private void validateUpdateRequest(MemberUpdateRequest request, Member currentMember) {
-        if (request.nickname() != null && !request.nickname().equals(currentMember.getNickname())) {
-            if (memberRepository.existsByNickname(request.nickname())) {
-                throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
-            }
-        }
+
+    private Member findMemberById(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.USER_NOT_FOUND));
     }
-
-    private void validatePasswordUpdate(PasswordUpdateRequest request, Member member) {
-        if (!request.currentPassword().equals(member.getPassword())) {
-            throw new CustomException(ErrorCode.INVALID_CURRENT_PASSWORD);
-        }
-
-        if (request.currentPassword().equals(request.newPassword())) {
-            throw new CustomException(ErrorCode.SAME_AS_CURRENT_PASSWORD);
-        }
-    }
-
 }
