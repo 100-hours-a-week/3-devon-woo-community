@@ -2,6 +2,7 @@ package com.kakaotechbootcamp.community.application.member.controller;
 
 import com.kakaotechbootcamp.community.application.member.dto.request.MemberUpdateRequest;
 import com.kakaotechbootcamp.community.application.member.dto.request.PasswordUpdateRequest;
+import com.kakaotechbootcamp.community.application.member.dto.response.MemberResponse;
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberUpdateResponse;
 import com.kakaotechbootcamp.community.application.member.service.MemberService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
@@ -22,6 +23,17 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
+
+    @Operation(summary = "회원 정보 조회", description = "회원의 프로필 정보를 조회합니다.")
+    @CustomExceptionDescription(SwaggerResponseDescription.MEMBER_GET)
+    @GetMapping("/{id}")
+    public ApiResponse<MemberResponse> getMemberProfile(
+            @Parameter(description = "회원 ID") @PathVariable Long id
+    ) {
+        MemberResponse response = memberService.getMemberProfile(id);
+        return ApiResponse.success(response, "member_get_success");
+    }
+
 
     @Operation(summary = "회원 정보 수정", description = "회원의 프로필 정보를 수정합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.MEMBER_UPDATE)

@@ -33,6 +33,9 @@ public enum SwaggerResponseDescription {
     AUTH_LOGOUT(new LinkedHashSet<>(Set.of())),
 
     // Member API
+    MEMBER_GET(new LinkedHashSet<>(Set.of(
+            MemberErrorCode.USER_NOT_FOUND
+    ))),
     MEMBER_UPDATE(new LinkedHashSet<>(Set.of(
             MemberErrorCode.USER_NOT_FOUND,
             MemberErrorCode.INVALID_NICKNAME,
