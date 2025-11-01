@@ -17,12 +17,15 @@ import com.kakaotechbootcamp.community.domain.post.repository.AttachmentReposito
 import com.kakaotechbootcamp.community.domain.post.repository.CommentRepository;
 import com.kakaotechbootcamp.community.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +48,7 @@ public class PostService {
     }
 
     public PostResponse updatePost(Long postId, PostUpdateRequest request, Long memberId) {
-        Post post = findPostById(postId);
+        Post post = findByIdWithMember(postId);
         Member member = findMemberById(memberId);
 
         accessPolicyValidator.checkAccess(post.getMember().getId(), memberId);
@@ -61,14 +64,15 @@ public class PostService {
     }
 
     public void deletePost(Long postId, Long memberId) {
-        Post post = findPostById(postId);
+        Post post = findByIdWithMember(postId);
         accessPolicyValidator.checkAccess(post.getMember().getId(), memberId);
 
         postRepository.deleteById(postId);
     }
 
     public PostResponse getPost(Long postId) {
-        Post post = findPostById(postId);
+        Post post = findByIdWithMember(postId);
+
         Member member = post.getMember();
         Attachment attachment = attachmentRepository.findByPostId(postId)
                 .orElse(null);
@@ -80,22 +84,21 @@ public class PostService {
     }
 
     public PostListResponse getPosts(int page, int size) {
-        List<Post> posts = postRepository.findAll();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Post> postPage = postRepository.findAllActiveWithMember(pageable);
 
+        List<Post> posts = postPage.getContent();
         List<Long> postIds = posts.stream()
                 .map(Post::getId)
                 .toList();
 
-        Map<Long, Long> commentCountMap = commentRepository.findByPostIdIn(postIds).stream()
-                .collect(Collectors.groupingBy(
-                        comment -> comment.getPost().getId(),
-                        Collectors.counting()
-                ));
+        // QueryDSL로 댓글 수를 DB에서 집계하여 조회 (GROUP BY 사용)
+        Map<Long, Long> commentCountMap = commentRepository.countCommentsByPostIds(postIds);
 
         List<PostSummaryResponse> postSummaries = posts.stream()
                 .map(post -> PostSummaryResponse.of(
                         post,
-                        post.getMember(),
+                        post.getMember(),  // 이미 fetch join으로 조회됨
                         commentCountMap.getOrDefault(post.getId(), 0L)
                 ))
                 .toList();
@@ -103,8 +106,8 @@ public class PostService {
         return PostListResponse.of(postSummaries, page, size);
     }
 
-    private Post findPostById(Long postId) {
-        return postRepository.findById(postId)
+    private Post findByIdWithMember(Long postId) {
+        return postRepository.findByIdWithMember(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
     }
 
