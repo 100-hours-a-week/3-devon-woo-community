@@ -11,6 +11,7 @@ import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final AuthValidationService authValidationService;
 
+    @Transactional
     public SignupResponse signup(SignupRequest request){
         authValidationService.validateSignupRequest(request);
 
@@ -33,6 +35,7 @@ public class AuthService {
         return new SignupResponse(savedMember.getId());
     }
 
+    @Transactional
     public LoginResponse login(LoginRequest request){
         Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(() -> new CustomException(MemberErrorCode.USER_NOT_FOUND));
