@@ -1,6 +1,6 @@
 package com.kakaotechbootcamp.community.domain.post.entity;
 
-import com.kakaotechbootcamp.community.domain.common.BaseEntity;
+import com.kakaotechbootcamp.community.domain.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.util.Assert;
@@ -11,7 +11,7 @@ import org.springframework.util.Assert;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "attachment")
-public class Attachment extends BaseEntity {
+public class Attachment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

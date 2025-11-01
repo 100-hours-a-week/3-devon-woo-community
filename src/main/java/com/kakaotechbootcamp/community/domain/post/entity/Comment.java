@@ -1,6 +1,6 @@
 package com.kakaotechbootcamp.community.domain.post.entity;
 
-import com.kakaotechbootcamp.community.domain.common.BaseEntity;
+import com.kakaotechbootcamp.community.domain.common.BaseTimeEntity;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +12,7 @@ import org.springframework.util.Assert;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "comment")
-public class Comment extends BaseEntity {
+public class Comment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

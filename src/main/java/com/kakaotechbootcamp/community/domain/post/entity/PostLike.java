@@ -1,6 +1,6 @@
 package com.kakaotechbootcamp.community.domain.post.entity;
 
-import com.kakaotechbootcamp.community.domain.common.BaseEntity;
+import com.kakaotechbootcamp.community.domain.common.BaseTimeEntity;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.post.entity.id.PostLikeId;
 import jakarta.persistence.*;
@@ -13,7 +13,7 @@ import org.springframework.util.Assert;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "post_like")
-public class PostLike extends BaseEntity {
+public class PostLike extends BaseTimeEntity {
 
     @EmbeddedId
     private PostLikeId id;
