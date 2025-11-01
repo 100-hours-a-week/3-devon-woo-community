@@ -8,16 +8,6 @@ import org.springframework.data.domain.Pageable;
 public interface PostQueryRepository {
 
     /**
-     * 게시글 목록 조회 (Member와 함께 fetch join)
-     */
-    Page<Post> findAllWithMember(Pageable pageable);
-
-    /**
-     * 삭제되지 않은 게시글 목록 조회 (Member와 함께 fetch join)
-     */
-    Page<Post> findAllActiveWithMember(Pageable pageable);
-
-    /**
      * 삭제되지 않은 게시글 목록 조회 (Projection 사용 - 필요한 필드만)
      * fetch join 대신 필요한 컬럼만 SELECT하여 성능 최적화
      */

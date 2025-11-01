@@ -38,60 +38,7 @@ public class PostRepositoryImpl implements PostQueryRepository {
     );
 
     @Override
-    public Page<Post> findAllWithMember(Pageable pageable) {
-        // 동적 정렬 적용 (기본값: createdAt desc)
-        OrderSpecifier<?>[] orders = QueryDslOrderUtil.getOrderSpecifiersWithDefault(
-                pageable,
-                post,
-                ALLOWED_SORT_FIELDS,
-                post.createdAt.desc()
-        );
-
-        List<Post> content = queryFactory
-                .selectFrom(post)
-                .join(post.member, member).fetchJoin()
-                .orderBy(orders)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        JPAQuery<Long> countQuery = queryFactory
-                .select(post.count())
-                .from(post);
-
-        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
-    }
-
-    @Override
-    public Page<Post> findAllActiveWithMember(Pageable pageable) {
-        // 동적 정렬 적용
-        OrderSpecifier<?>[] orders = QueryDslOrderUtil.getOrderSpecifiersWithDefault(
-                pageable,
-                post,
-                ALLOWED_SORT_FIELDS,
-                post.createdAt.desc()
-        );
-
-        List<Post> content = queryFactory
-                .selectFrom(post)
-                .join(post.member, member).fetchJoin()
-                .where(post.isDeleted.eq(false))
-                .orderBy(orders)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        JPAQuery<Long> countQuery = queryFactory
-                .select(post.count())
-                .from(post)
-                .where(post.isDeleted.eq(false));
-
-        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
-    }
-
-    @Override
     public Page<PostSummaryDto> findAllActiveWithMemberAsDto(Pageable pageable) {
-        // 동적 정렬 적용
         OrderSpecifier<?>[] orders = QueryDslOrderUtil.getOrderSpecifiersWithDefault(
                 pageable,
                 post,
@@ -99,7 +46,6 @@ public class PostRepositoryImpl implements PostQueryRepository {
                 post.createdAt.desc()
         );
 
-        // Projection: 필요한 컬럼만 SELECT (fetch join 불필요)
         List<PostSummaryDto> content = queryFactory
                 .select(Projections.constructor(PostSummaryDto.class,
                         post.id,
@@ -112,7 +58,7 @@ public class PostRepositoryImpl implements PostQueryRepository {
                         member.email
                 ))
                 .from(post)
-                .join(post.member, member)  // inner join (fetch join 아님)
+                .join(post.member, member)
                 .where(post.isDeleted.eq(false))
                 .orderBy(orders)
                 .offset(pageable.getOffset())
