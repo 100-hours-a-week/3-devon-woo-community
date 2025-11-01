@@ -24,10 +24,14 @@ public class PostLikeService {
     private final MemberRepository memberRepository;
     private final PostLikePolicyValidator postLikePolicyValidator;
 
+    /**
+     * 게시글 좋아요
+     */
     @Transactional
     public PostLikeResponse likePost(Long postId, Long memberId) {
         Post post = findPostById(postId);
         Member member = findMemberById(memberId);
+
         postLikePolicyValidator.checkNotAlreadyLiked(postId, memberId);
 
         postLikeRepository.save(PostLike.create(post, member));
@@ -37,6 +41,9 @@ public class PostLikeService {
         return PostLikeResponse.of(postId, post.getLikeCount());
     }
 
+    /**
+     * 게시글 좋아요 취소
+     */
     @Transactional
     public PostLikeResponse unlikePost(Long postId, Long memberId) {
         Post post = findPostById(postId);
