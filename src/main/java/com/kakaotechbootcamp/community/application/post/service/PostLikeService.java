@@ -35,10 +35,13 @@ public class PostLikeService {
         postLikePolicyValidator.checkNotAlreadyLiked(postId, memberId);
 
         postLikeRepository.save(PostLike.create(post, member));
-        post.incrementLikes();
-        postRepository.save(post);
+        postRepository.incrementLikeCount(postId);
 
-        return PostLikeResponse.of(postId, post.getLikeCount());
+        Long updatedLikeCount = postRepository.findById(postId)
+                .map(Post::getLikeCount)
+                .orElse(0L);
+
+        return PostLikeResponse.of(postId, updatedLikeCount);
     }
 
     /**
@@ -46,14 +49,17 @@ public class PostLikeService {
      */
     @Transactional
     public PostLikeResponse unlikePost(Long postId, Long memberId) {
-        Post post = findPostById(postId);
+        findPostById(postId); // 게시글 존재 여부 확인
         postLikePolicyValidator.checkLikeExists(postId, memberId);
 
         postLikeRepository.deleteByPostIdAndMemberId(postId, memberId);
-        post.decrementLikes();
-        postRepository.save(post);
+        postRepository.decrementLikeCount(postId);
 
-        return PostLikeResponse.of(postId, post.getLikeCount());
+        Long updatedLikeCount = postRepository.findById(postId)
+                .map(Post::getLikeCount)
+                .orElse(0L);
+
+        return PostLikeResponse.of(postId, updatedLikeCount);
     }
 
     private Post findPostById(Long postId) {
