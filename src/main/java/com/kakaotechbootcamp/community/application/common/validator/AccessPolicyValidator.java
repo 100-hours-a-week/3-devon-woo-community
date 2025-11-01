@@ -1,4 +1,4 @@
-package com.kakaotechbootcamp.community.application.validator;
+package com.kakaotechbootcamp.community.application.common.validator;
 
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.PostErrorCode;

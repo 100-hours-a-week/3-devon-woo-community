@@ -4,7 +4,7 @@ import com.kakaotechbootcamp.community.application.comment.dto.request.CommentCr
 import com.kakaotechbootcamp.community.application.comment.dto.request.CommentUpdateRequest;
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentListResponse;
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentResponse;
-import com.kakaotechbootcamp.community.application.validator.AccessPolicyValidator;
+import com.kakaotechbootcamp.community.application.common.validator.AccessPolicyValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.CommentErrorCode;
 import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
