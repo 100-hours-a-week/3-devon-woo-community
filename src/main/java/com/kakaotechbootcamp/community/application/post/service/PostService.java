@@ -37,6 +37,10 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final AccessPolicyValidator accessPolicyValidator;
 
+
+    /**
+     * 게시글 생성
+     */
     public PostResponse createPost(PostCreateRequest request, Long memberId) {
         Member member = findMemberById(memberId);
 
@@ -48,6 +52,9 @@ public class PostService {
         return PostResponse.of(savedPost, member, savedAttachment);
     }
 
+    /**
+     * 게시글 수정
+     */
     public PostResponse updatePost(Long postId, PostUpdateRequest request, Long memberId) {
         Post post = findByIdWithMember(postId);
         Member member = findMemberById(memberId);
@@ -64,6 +71,9 @@ public class PostService {
         return PostResponse.of(savedPost, member, attachment);
     }
 
+    /**
+     * 게시글 삭제
+     */
     public void deletePost(Long postId, Long memberId) {
         Post post = findByIdWithMember(postId);
         accessPolicyValidator.checkAccess(post.getMember().getId(), memberId);
@@ -71,6 +81,9 @@ public class PostService {
         postRepository.deleteById(postId);
     }
 
+    /**
+     * 게시글 조회
+     */
     public PostResponse getPost(Long postId) {
         Post post = findByIdWithMember(postId);
 
@@ -84,6 +97,9 @@ public class PostService {
         return PostResponse.of(post, member, attachment);
     }
 
+    /**
+     * 게시글 리스트 조회
+     */
     public PostListResponse getPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<PostSummaryDto> postDtoPage = postRepository.findAllActiveWithMemberAsDto(pageable);
