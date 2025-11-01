@@ -2,7 +2,6 @@ package com.kakaotechbootcamp.community.domain.post.repository.impl;
 
 import com.kakaotechbootcamp.community.domain.common.repository.QueryDslOrderUtil;
 import com.kakaotechbootcamp.community.domain.post.dto.CommentSummaryDto;
-import com.kakaotechbootcamp.community.domain.post.entity.Comment;
 import com.kakaotechbootcamp.community.domain.post.repository.CommentQueryRepository;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 
 import static com.kakaotechbootcamp.community.domain.member.entity.QMember.member;
 import static com.kakaotechbootcamp.community.domain.post.entity.QComment.comment;
-import static com.kakaotechbootcamp.community.domain.post.entity.QPost.post;
 
 @Repository
 @RequiredArgsConstructor
@@ -37,16 +35,6 @@ public class CommentRepositoryImpl implements CommentQueryRepository {
             "createdAt",
             "updatedAt"
     );
-
-    @Override
-    public List<Comment> findByPostIdWithMember(Long postId) {
-        return queryFactory
-                .selectFrom(comment)
-                .join(comment.member, member).fetchJoin()
-                .where(comment.post.id.eq(postId))
-                .orderBy(comment.createdAt.asc())
-                .fetch();
-    }
 
     @Override
     public Page<CommentSummaryDto> findByPostIdWithMemberAsDto(Long postId, Pageable pageable) {
@@ -98,15 +86,5 @@ public class CommentRepositoryImpl implements CommentQueryRepository {
                         tuple -> tuple.get(comment.post.id),
                         tuple -> tuple.get(comment.count())
                 ));
-    }
-
-    @Override
-    public List<Comment> findByMemberId(Long memberId) {
-        return queryFactory
-                .selectFrom(comment)
-                .join(comment.post, post).fetchJoin()
-                .where(comment.member.id.eq(memberId))
-                .orderBy(comment.createdAt.desc())
-                .fetch();
     }
 }

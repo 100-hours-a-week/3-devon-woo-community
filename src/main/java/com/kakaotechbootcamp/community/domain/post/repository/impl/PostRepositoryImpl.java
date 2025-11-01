@@ -16,7 +16,6 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static com.kakaotechbootcamp.community.domain.member.entity.QMember.member;
@@ -127,26 +126,6 @@ public class PostRepositoryImpl implements PostQueryRepository {
                 .where(post.isDeleted.eq(false));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
-    }
-
-    @Override
-    public Optional<Post> findByIdWithMember(Long postId) {
-        Post result = queryFactory
-                .selectFrom(post)
-                .join(post.member, member).fetchJoin()
-                .where(post.id.eq(postId))
-                .fetchOne();
-
-        return Optional.ofNullable(result);
-    }
-
-    @Override
-    public List<Post> findByMemberId(Long memberId) {
-        return queryFactory
-                .selectFrom(post)
-                .where(post.member.id.eq(memberId))
-                .orderBy(post.createdAt.desc())
-                .fetch();
     }
 
     @Override

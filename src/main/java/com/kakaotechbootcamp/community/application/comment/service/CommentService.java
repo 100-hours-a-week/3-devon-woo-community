@@ -52,7 +52,7 @@ public class CommentService {
      */
     @Transactional
     public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, Long requesterId) {
-        Comment comment = findCommentById(commentId);
+        Comment comment = findCommentByIdWithMember(commentId);
         Member member = comment.getMember();
 
         accessPolicyValidator.checkAccess(comment.getMember().getId(), requesterId);
@@ -68,7 +68,7 @@ public class CommentService {
      */
     @Transactional
     public void deleteComment(Long commentId, Long requesterId) {
-        Comment comment = findCommentById(commentId);
+        Comment comment = findCommentByIdWithMember(commentId);
         accessPolicyValidator.checkAccess(comment.getMember().getId(), requesterId);
 
         commentRepository.deleteById(comment.getId());
@@ -79,10 +79,9 @@ public class CommentService {
      */
     @Transactional(readOnly = true)
     public CommentResponse getCommentsDetails(Long commentId) {
-        Comment comment = findCommentById(commentId);
-        Member member = comment.getMember();
+        Comment comment = findCommentByIdWithMember(commentId);
 
-        return CommentResponse.of(comment, member);
+        return CommentResponse.of(comment, comment.getMember());
     }
 
     /**
@@ -106,8 +105,8 @@ public class CommentService {
                 .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
     }
 
-    private Comment findCommentById(Long commentId) {
-        return commentRepository.findById(commentId)
+    private Comment findCommentByIdWithMember(Long commentId) {
+        return commentRepository.findByIdWithMember(commentId)
                 .orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
     }
 
