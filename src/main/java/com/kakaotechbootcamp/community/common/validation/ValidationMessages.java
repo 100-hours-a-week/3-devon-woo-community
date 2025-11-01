@@ -28,7 +28,7 @@ public class ValidationMessages {
     public static final String REQUIRED_COMMENT_CONTENT = "댓글 내용을 입력해주세요";
 
     // ID 관련
-    public static final String REQUIRED_AUTHOR_ID = "작성자 정보가 필요합니다";
+    public static final String REQUIRED_MEMBER_ID = "작성자 정보가 필요합니다";
 
     private ValidationMessages() {
         // 인스턴스 생성 방지

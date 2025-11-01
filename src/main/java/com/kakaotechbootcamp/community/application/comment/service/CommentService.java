@@ -19,9 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,38 +29,38 @@ public class CommentService {
     private final PostRepository postRepository;
     private final AccessPolicyValidator accessPolicyValidator;
 
-    public CommentResponse createComment(Long postId, CommentCreateRequest request, Long authorId) {
+    public CommentResponse createComment(Long postId, CommentCreateRequest request, Long memberId) {
         Post post = findPostById(postId);
-        Member author = findMemberById(authorId);
+        Member member = findMemberById(memberId);
 
-        Comment comment = Comment.create(author, post, request.content());
+        Comment comment = Comment.create(member, post, request.content());
         commentRepository.save(comment);
 
-        return CommentResponse.of(comment, author);
+        return CommentResponse.of(comment, member);
     }
 
     public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, Long requesterId) {
         Comment comment = findCommentById(commentId);
-        Member author = comment.getAuthor();
+        Member member = comment.getMember();
 
-        accessPolicyValidator.checkAccess(comment.getAuthor().getId(), requesterId);
+        accessPolicyValidator.checkAccess(comment.getMember().getId(), requesterId);
 
         comment.updateContent(request.content());
         commentRepository.save(comment);
 
-        return CommentResponse.of(comment, author);
+        return CommentResponse.of(comment, member);
     }
 
     public void deleteComment(Long commentId, Long requesterId) {
         Comment comment = findCommentById(commentId);
-        accessPolicyValidator.checkAccess(comment.getAuthor().getId(), requesterId);
+        accessPolicyValidator.checkAccess(comment.getMember().getId(), requesterId);
 
         commentRepository.deleteById(comment.getId());
     }
 
     public CommentResponse getComment(Long commentId) {
         Comment comment = findCommentById(commentId);
-        Member member = comment.getAuthor();
+        Member member = comment.getMember();
 
         return CommentResponse.of(comment, member);
     }
@@ -74,7 +71,7 @@ public class CommentService {
         List<Comment> comments = commentRepository.findByPostId(postId);
 
         List<CommentResponse> commentResponses = comments.stream()
-                .map(comment -> CommentResponse.of(comment, comment.getAuthor()))
+                .map(comment -> CommentResponse.of(comment, comment.getMember()))
                 .toList();
 
         return CommentListResponse.of(postId, commentResponses, page, size);

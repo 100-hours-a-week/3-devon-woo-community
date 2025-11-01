@@ -12,7 +12,6 @@ import com.kakaotechbootcamp.community.common.exception.code.PostErrorCode;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
 import com.kakaotechbootcamp.community.domain.post.entity.Attachment;
-import com.kakaotechbootcamp.community.domain.post.entity.Comment;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import com.kakaotechbootcamp.community.domain.post.repository.AttachmentRepository;
 import com.kakaotechbootcamp.community.domain.post.repository.CommentRepository;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,8 +33,8 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final AccessPolicyValidator accessPolicyValidator;
 
-    public PostResponse createPost(PostCreateRequest request, Long authorId) {
-        Member member = findMemberById(authorId);
+    public PostResponse createPost(PostCreateRequest request, Long memberId) {
+        Member member = findMemberById(memberId);
 
         Post post = Post.create(member, request.title(), request.content());
         Post savedPost = postRepository.save(post);
@@ -46,11 +44,11 @@ public class PostService {
         return PostResponse.of(savedPost, member, savedAttachment);
     }
 
-    public PostResponse updatePost(Long postId, PostUpdateRequest request, Long authorId) {
+    public PostResponse updatePost(Long postId, PostUpdateRequest request, Long memberId) {
         Post post = findPostById(postId);
-        Member member = findMemberById(authorId);
+        Member member = findMemberById(memberId);
 
-        accessPolicyValidator.checkAccess(post.getAuthor().getId(), authorId);
+        accessPolicyValidator.checkAccess(post.getMember().getId(), memberId);
 
         post.updatePost(request.title(), request.content());
         Post savedPost = postRepository.save(post);
@@ -62,16 +60,16 @@ public class PostService {
         return PostResponse.of(savedPost, member, attachment);
     }
 
-    public void deletePost(Long postId, Long authorId) {
+    public void deletePost(Long postId, Long memberId) {
         Post post = findPostById(postId);
-        accessPolicyValidator.checkAccess(post.getAuthor().getId(), authorId);
+        accessPolicyValidator.checkAccess(post.getMember().getId(), memberId);
 
         postRepository.deleteById(postId);
     }
 
     public PostResponse getPost(Long postId) {
         Post post = findPostById(postId);
-        Member member = post.getAuthor();
+        Member member = post.getMember();
         Attachment attachment = attachmentRepository.findByPostId(postId)
                 .orElse(null);
 
@@ -97,7 +95,7 @@ public class PostService {
         List<PostSummaryResponse> postSummaries = posts.stream()
                 .map(post -> PostSummaryResponse.of(
                         post,
-                        post.getAuthor(),
+                        post.getMember(),
                         commentCountMap.getOrDefault(post.getId(), 0L)
                 ))
                 .toList();

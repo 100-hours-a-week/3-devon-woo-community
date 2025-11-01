@@ -1,10 +1,10 @@
 package com.kakaotechbootcamp.community.common.swagger;
 
 import com.kakaotechbootcamp.community.common.exception.ErrorCode;
+import com.kakaotechbootcamp.community.common.exception.code.CommentErrorCode;
 import com.kakaotechbootcamp.community.common.exception.code.CommonErrorCode;
 import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
 import com.kakaotechbootcamp.community.common.exception.code.PostErrorCode;
-import com.kakaotechbootcamp.community.common.exception.code.CommentErrorCode;
 import lombok.Getter;
 
 import java.util.LinkedHashSet;

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import static com.kakaotechbootcamp.community.common.validation.ValidationMessages.*;
-import static com.kakaotechbootcamp.community.common.validation.ValidationPatterns.*;
+import static com.kakaotechbootcamp.community.common.validation.ValidationPatterns.PASSWORD_MIN_LENGTH;
 
 @Schema(description = "비밀번호 변경 요청 DTO")
 public record PasswordUpdateRequest(

@@ -20,7 +20,7 @@ public enum PostErrorCode implements ErrorCode {
     LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "좋아요를 찾을 수 없습니다"),
 
     // 게시글 생성/수정 에러 (400)
-    POST_AUTHOR_REQUIRED(HttpStatus.BAD_REQUEST, "작성자는 필수입니다"),
+    POST_MEMBER_REQUIRED(HttpStatus.BAD_REQUEST, "작성자는 필수입니다"),
     POST_TITLE_REQUIRED(HttpStatus.BAD_REQUEST, "제목은 필수입니다"),
     POST_TITLE_TOO_LONG(HttpStatus.BAD_REQUEST, "제목은 200자를 초과할 수 없습니다"),
     POST_CONTENT_REQUIRED(HttpStatus.BAD_REQUEST, "내용은 필수입니다"),
