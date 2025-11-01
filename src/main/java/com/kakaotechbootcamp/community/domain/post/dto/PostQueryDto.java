@@ -11,7 +11,7 @@ import java.time.Instant;
  */
 @Getter
 @AllArgsConstructor
-public class PostSummaryDto {
+public class PostQueryDto {
     // Post 정보
     private Long postId;
     private String title;

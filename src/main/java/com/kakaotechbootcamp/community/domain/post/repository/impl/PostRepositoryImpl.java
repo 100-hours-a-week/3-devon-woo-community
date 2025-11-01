@@ -1,7 +1,7 @@
 package com.kakaotechbootcamp.community.domain.post.repository.impl;
 
 import com.kakaotechbootcamp.community.domain.common.repository.QueryDslOrderUtil;
-import com.kakaotechbootcamp.community.domain.post.dto.PostSummaryDto;
+import com.kakaotechbootcamp.community.domain.post.dto.PostQueryDto;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import com.kakaotechbootcamp.community.domain.post.repository.PostQueryRepository;
 import com.querydsl.core.types.OrderSpecifier;
@@ -38,7 +38,7 @@ public class PostRepositoryImpl implements PostQueryRepository {
     );
 
     @Override
-    public Page<PostSummaryDto> findAllActiveWithMemberAsDto(Pageable pageable) {
+    public Page<PostQueryDto> findAllActiveWithMemberAsDto(Pageable pageable) {
         OrderSpecifier<?>[] orders = QueryDslOrderUtil.getOrderSpecifiersWithDefault(
                 pageable,
                 post,
@@ -46,8 +46,8 @@ public class PostRepositoryImpl implements PostQueryRepository {
                 post.createdAt.desc()
         );
 
-        List<PostSummaryDto> content = queryFactory
-                .select(Projections.constructor(PostSummaryDto.class,
+        List<PostQueryDto> content = queryFactory
+                .select(Projections.constructor(PostQueryDto.class,
                         post.id,
                         post.title,
                         post.createdAt,

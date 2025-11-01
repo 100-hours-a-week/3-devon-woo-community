@@ -1,7 +1,7 @@
 package com.kakaotechbootcamp.community.application.post.dto.response;
 
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberResponse;
-import com.kakaotechbootcamp.community.domain.post.dto.PostSummaryDto;
+import com.kakaotechbootcamp.community.domain.post.dto.PostQueryDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;
@@ -23,7 +23,7 @@ public record PostSummaryResponse(
         @Schema(description = "댓글 수", example = "5")
         Long commentsCount
 ) {
-    public static PostSummaryResponse fromDto(PostSummaryDto dto, long commentsCount) {
+    public static PostSummaryResponse fromDto(PostQueryDto dto, long commentsCount) {
         return new PostSummaryResponse(
                 dto.getPostId(),
                 dto.getTitle(),

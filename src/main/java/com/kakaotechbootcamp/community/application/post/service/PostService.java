@@ -5,7 +5,7 @@ import com.kakaotechbootcamp.community.application.post.dto.request.PostCreateRe
 import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRequest;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostSummaryResponse;
-import com.kakaotechbootcamp.community.domain.post.dto.PostSummaryDto;
+import com.kakaotechbootcamp.community.domain.post.dto.PostQueryDto;
 import com.kakaotechbootcamp.community.application.common.validator.AccessPolicyValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
@@ -105,11 +105,11 @@ public class PostService {
      */
     @Transactional(readOnly = true)
     public PageResponse<PostSummaryResponse> getPostPage(Pageable pageable) {
-        Page<PostSummaryDto> postDtoPage = postRepository.findAllActiveWithMemberAsDto(pageable);
+        Page<PostQueryDto> postDtoPage = postRepository.findAllActiveWithMemberAsDto(pageable);
 
-        List<PostSummaryDto> postDtos = postDtoPage.getContent();
+        List<PostQueryDto> postDtos = postDtoPage.getContent();
         List<Long> postIds = postDtos.stream()
-                .map(PostSummaryDto::getPostId)
+                .map(PostQueryDto::getPostId)
                 .toList();
 
         Map<Long, Long> commentCountMap = commentRepository.countCommentsByPostIds(postIds);
