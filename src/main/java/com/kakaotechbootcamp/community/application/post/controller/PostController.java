@@ -71,7 +71,7 @@ public class PostController {
     @CustomExceptionDescription(SwaggerResponseDescription.POST_GET)
     @GetMapping("/{postId}")
     public ApiResponse<PostResponse> getPost(@Parameter(description = "게시글 ID") @PathVariable Long postId) {
-        PostResponse response = postService.getPost(postId);
+        PostResponse response = postService.getPostDetails(postId);
         return ApiResponse.success(response, "post_retrieved");
     }
 

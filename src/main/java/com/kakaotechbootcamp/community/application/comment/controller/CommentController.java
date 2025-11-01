@@ -61,7 +61,7 @@ public class CommentController {
     @CustomExceptionDescription(SwaggerResponseDescription.COMMENT_GET)
     @GetMapping("/comments/{commentId}")
     public ApiResponse<CommentResponse> getComment(@Parameter(description = "댓글 ID") @PathVariable Long commentId) {
-        CommentResponse response = commentService.getComment(commentId);
+        CommentResponse response = commentService.getCommentsDetails(commentId);
         return ApiResponse.success(response, "comment_fetched");
     }
 

@@ -82,7 +82,7 @@ public class PostService {
     /**
      * 게시글 조회
      */
-    public PostResponse getPost(Long postId) {
+    public PostResponse getPostDetails(Long postId) {
         Post post = findByIdWithMember(postId);
 
         Member member = post.getMember();

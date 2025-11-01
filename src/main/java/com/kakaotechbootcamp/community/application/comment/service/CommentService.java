@@ -2,7 +2,6 @@ package com.kakaotechbootcamp.community.application.comment.service;
 
 import com.kakaotechbootcamp.community.application.comment.dto.request.CommentCreateRequest;
 import com.kakaotechbootcamp.community.application.comment.dto.request.CommentUpdateRequest;
-import com.kakaotechbootcamp.community.application.comment.dto.response.CommentListResponse;
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentResponse;
 import com.kakaotechbootcamp.community.application.common.dto.response.PageResponse;
 import com.kakaotechbootcamp.community.application.common.validator.AccessPolicyValidator;
@@ -61,7 +60,7 @@ public class CommentService {
         commentRepository.deleteById(comment.getId());
     }
 
-    public CommentResponse getComment(Long commentId) {
+    public CommentResponse getCommentsDetails(Long commentId) {
         Comment comment = findCommentById(commentId);
         Member member = comment.getMember();
 
