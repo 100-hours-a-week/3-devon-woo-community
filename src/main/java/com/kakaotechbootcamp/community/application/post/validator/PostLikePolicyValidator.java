@@ -12,12 +12,18 @@ public class PostLikePolicyValidator {
 
     private final PostLikeRepository postLikeRepository;
 
+    /**
+     * 이미 좋아요가 된 경우
+     */
     public void checkNotAlreadyLiked(Long postId, Long memberId) {
         if (postLikeRepository.existsByPostIdAndMemberId(postId, memberId)) {
             throw new CustomException(PostErrorCode.ALREADY_LIKED);
         }
     }
 
+    /**
+     * 이미 좋아요가 존재하는지 체크
+     */
     public void checkLikeExists(Long postId, Long memberId) {
         if (!postLikeRepository.existsByPostIdAndMemberId(postId, memberId)) {
             throw new CustomException(PostErrorCode.LIKE_NOT_FOUND);

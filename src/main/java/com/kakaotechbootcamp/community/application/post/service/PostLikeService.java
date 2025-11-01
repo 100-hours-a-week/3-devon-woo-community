@@ -57,7 +57,7 @@ public class PostLikeService {
     }
 
     private Post findPostById(Long postId) {
-        return postRepository.findById(postId)
+        return postRepository.findByIdWithMember(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
     }
 
