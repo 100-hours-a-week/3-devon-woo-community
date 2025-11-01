@@ -1,14 +1,23 @@
 package com.kakaotechbootcamp.community.domain.post.repository.impl;
 
+import com.kakaotechbootcamp.community.domain.common.repository.QueryDslOrderUtil;
+import com.kakaotechbootcamp.community.domain.post.dto.CommentSummaryDto;
 import com.kakaotechbootcamp.community.domain.post.entity.Comment;
 import com.kakaotechbootcamp.community.domain.post.repository.CommentQueryRepository;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.kakaotechbootcamp.community.domain.member.entity.QMember.member;
@@ -21,6 +30,14 @@ public class CommentRepositoryImpl implements CommentQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
+    // 허용된 정렬 필드 (화이트리스트)
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+            "id",
+            "content",
+            "createdAt",
+            "updatedAt"
+    );
+
     @Override
     public List<Comment> findByPostIdWithMember(Long postId) {
         return queryFactory
@@ -29,6 +46,42 @@ public class CommentRepositoryImpl implements CommentQueryRepository {
                 .where(comment.post.id.eq(postId))
                 .orderBy(comment.createdAt.asc())
                 .fetch();
+    }
+
+    @Override
+    public Page<CommentSummaryDto> findByPostIdWithMemberAsDto(Long postId, Pageable pageable) {
+        OrderSpecifier<?>[] orders = QueryDslOrderUtil.getOrderSpecifiersWithDefault(
+                pageable,
+                comment,
+                ALLOWED_SORT_FIELDS,
+                comment.createdAt.asc()
+        );
+
+        List<CommentSummaryDto> content = queryFactory
+                .select(Projections.constructor(CommentSummaryDto.class,
+                        comment.id,
+                        comment.post.id,
+                        comment.content,
+                        comment.createdAt,
+                        comment.updatedAt,
+                        member.id,
+                        member.nickname,
+                        member.profileImageUrl
+                ))
+                .from(comment)
+                .join(comment.member, member)  // inner join (fetch join 아님)
+                .where(comment.post.id.eq(postId))
+                .orderBy(orders)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(comment.count())
+                .from(comment)
+                .where(comment.post.id.eq(postId));
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
     @Override

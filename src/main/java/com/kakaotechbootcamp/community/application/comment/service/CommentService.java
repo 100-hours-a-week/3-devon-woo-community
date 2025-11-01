@@ -11,6 +11,7 @@ import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
 import com.kakaotechbootcamp.community.common.exception.code.PostErrorCode;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
+import com.kakaotechbootcamp.community.domain.post.dto.CommentSummaryDto;
 import com.kakaotechbootcamp.community.domain.post.entity.Comment;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import com.kakaotechbootcamp.community.domain.post.repository.CommentRepository;
@@ -73,13 +74,13 @@ public class CommentService {
     public PageResponse<CommentResponse> getCommentPageByPostId(Long postId, Pageable pageable) {
         findPostById(postId);
 
-        Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);
+        Page<CommentSummaryDto> commentDtoPage = commentRepository.findByPostIdWithMemberAsDto(postId, pageable);
 
-        List<CommentResponse> commentResponses = commentPage.getContent().stream()
-                .map(comment -> CommentResponse.of(comment, comment.getMember()))
+        List<CommentResponse> commentResponses = commentDtoPage.getContent().stream()
+                .map(CommentResponse::of)
                 .toList();
 
-        return PageResponse.of(commentResponses, commentPage);
+        return PageResponse.of(commentResponses, commentDtoPage);
     }
 
     private Post findPostById(Long postId) {

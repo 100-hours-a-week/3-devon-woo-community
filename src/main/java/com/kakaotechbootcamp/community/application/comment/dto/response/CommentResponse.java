@@ -2,6 +2,7 @@ package com.kakaotechbootcamp.community.application.comment.dto.response;
 
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberResponse;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
+import com.kakaotechbootcamp.community.domain.post.dto.CommentSummaryDto;
 import com.kakaotechbootcamp.community.domain.post.entity.Comment;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -30,6 +31,21 @@ public record CommentResponse(
                 MemberResponse.of(member),
                 comment.getCreatedAt(),
                 comment.getUpdatedAt()
+        );
+    }
+
+    public static CommentResponse of(CommentSummaryDto dto) {
+        return new CommentResponse(
+                dto.getCommentId(),
+                dto.getPostId(),
+                dto.getContent(),
+                new MemberResponse(
+                        dto.getMemberId(),
+                        dto.getMemberNickname(),
+                        dto.getMemberProfileImage()
+                ),
+                dto.getCreatedAt(),
+                dto.getUpdatedAt()
         );
     }
 }
