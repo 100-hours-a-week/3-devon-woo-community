@@ -1,8 +1,8 @@
 package com.kakaotechbootcamp.community.application.post.service;
 
+import com.kakaotechbootcamp.community.application.common.dto.response.PageResponse;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostCreateRequest;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRequest;
-import com.kakaotechbootcamp.community.application.post.dto.response.PostListResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostSummaryResponse;
 import com.kakaotechbootcamp.community.domain.post.dto.PostSummaryDto;
@@ -98,7 +98,7 @@ public class PostService {
     /**
      * 게시글 페이지 조회 (+페이징 및 정렬)
      */
-    public PostListResponse getPostPage(Pageable pageable) {
+    public PageResponse<PostSummaryResponse> getPostPage(Pageable pageable) {
         Page<PostSummaryDto> postDtoPage = postRepository.findAllActiveWithMemberAsDto(pageable);
 
         List<PostSummaryDto> postDtos = postDtoPage.getContent();
@@ -112,7 +112,7 @@ public class PostService {
                 .map(dto -> PostSummaryResponse.fromDto(dto, commentCountMap.getOrDefault(dto.getPostId(), 0L)))
                 .toList();
 
-        return PostListResponse.of(postSummaries, postDtoPage);
+        return PageResponse.of(postSummaries, postDtoPage);
     }
 
     private Post findByIdWithMember(Long postId) {

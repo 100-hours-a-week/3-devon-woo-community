@@ -1,14 +1,14 @@
-package com.kakaotechbootcamp.community.application.post.dto.response;
+package com.kakaotechbootcamp.community.application.common.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-@Schema(description = "게시글 목록 응답 DTO")
-public record PostListResponse(
-        @Schema(description = "게시글 목록")
-        List<PostSummaryResponse> items,
+@Schema(description = "페이징 응답 공통 DTO")
+public record PageResponse<T>(
+        @Schema(description = "데이터 목록")
+        List<T> items,
 
         @Schema(description = "현재 페이지 번호 (0부터 시작)", example = "0")
         int page,
@@ -16,14 +16,14 @@ public record PostListResponse(
         @Schema(description = "페이지 크기", example = "20")
         int size,
 
-        @Schema(description = "전체 게시글 수", example = "100")
+        @Schema(description = "전체 항목 수", example = "100")
         long totalElements,
 
         @Schema(description = "전체 페이지 수", example = "5")
         int totalPages
 ) {
-    public static PostListResponse of(List<PostSummaryResponse> items, Page<?> page) {
-        return new PostListResponse(
+    public static <T> PageResponse<T> of(List<T> items, Page<?> page) {
+        return new PageResponse<>(
                 items,
                 page.getNumber(),
                 page.getSize(),

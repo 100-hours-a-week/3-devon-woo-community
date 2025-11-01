@@ -1,11 +1,12 @@
 package com.kakaotechbootcamp.community.application.post.controller;
 
 import com.kakaotechbootcamp.community.application.common.dto.request.PageSortRequest;
+import com.kakaotechbootcamp.community.application.common.dto.response.PageResponse;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostCreateRequest;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRequest;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostLikeResponse;
-import com.kakaotechbootcamp.community.application.post.dto.response.PostListResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
+import com.kakaotechbootcamp.community.application.post.dto.response.PostSummaryResponse;
 import com.kakaotechbootcamp.community.application.post.service.PostLikeService;
 import com.kakaotechbootcamp.community.application.post.service.PostService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
@@ -77,7 +78,7 @@ public class PostController {
     @Operation(summary = "게시글 목록 조회", description = "게시글 목록을 페이징하여 조회합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.POST_LIST)
     @GetMapping
-    public ApiResponse<PostListResponse> getPostPage(
+    public ApiResponse<PageResponse<PostSummaryResponse>> getPostPage(
             @Parameter(description = "페이지 번호", example = "0")
             @RequestParam(required = false) Integer page,
 
@@ -88,7 +89,7 @@ public class PostController {
             @RequestParam(required = false) List<String> sort
     ) {
         PageSortRequest pageSortRequest = new PageSortRequest(page, size, sort);
-        PostListResponse response = postService.getPostPage(pageSortRequest.toPageable());
+        PageResponse<PostSummaryResponse> response = postService.getPostPage(pageSortRequest.toPageable());
         return ApiResponse.success(response, "posts_retrieved");
     }
 
