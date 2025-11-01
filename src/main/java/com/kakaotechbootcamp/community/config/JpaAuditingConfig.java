@@ -1,4 +1,4 @@
-package com.kakaotechbootcamp.community.common.config;
+package com.kakaotechbootcamp.community.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;

@@ -5,7 +5,7 @@ import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRe
 import com.kakaotechbootcamp.community.application.post.dto.response.PostListResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostSummaryResponse;
-import com.kakaotechbootcamp.community.application.validator.AccessPolicyValidator;
+import com.kakaotechbootcamp.community.application.common.validator.AccessPolicyValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
 import com.kakaotechbootcamp.community.common.exception.code.PostErrorCode;
