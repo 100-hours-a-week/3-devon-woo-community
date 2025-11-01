@@ -1,6 +1,6 @@
 package com.kakaotechbootcamp.community.domain.post.entity;
 
-import com.kakaotechbootcamp.community.domain.common.BaseTimeEntity;
+import com.kakaotechbootcamp.community.domain.common.entity.BaseTimeEntity;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
