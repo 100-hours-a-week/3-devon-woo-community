@@ -1,5 +1,6 @@
 package com.kakaotechbootcamp.community.application.post.controller;
 
+import com.kakaotechbootcamp.community.application.common.dto.request.PageSortRequest;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostCreateRequest;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRequest;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostLikeResponse;
@@ -17,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Post", description = "게시글 관련 API")
 @RestController
@@ -74,11 +77,18 @@ public class PostController {
     @Operation(summary = "게시글 목록 조회", description = "게시글 목록을 페이징하여 조회합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.POST_LIST)
     @GetMapping
-    public ApiResponse<PostListResponse> getPosts(
-            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "1") int page,
-            @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "20") int size
+    public ApiResponse<PostListResponse> getPostPage(
+            @Parameter(description = "페이지 번호", example = "0")
+            @RequestParam(required = false) Integer page,
+
+            @Parameter(description = "페이지 크기", example = "20")
+            @RequestParam(required = false) Integer size,
+
+            @Parameter(description = "정렬 기준 (필드명,방향). 다중 정렬 가능", example = "createdAt,desc")
+            @RequestParam(required = false) List<String> sort
     ) {
-        PostListResponse response = postService.getPosts(page, size);
+        PageSortRequest pageSortRequest = new PageSortRequest(page, size, sort);
+        PostListResponse response = postService.getPostPage(pageSortRequest.toPageable());
         return ApiResponse.success(response, "posts_retrieved");
     }
 

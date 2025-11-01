@@ -19,9 +19,7 @@ import com.kakaotechbootcamp.community.domain.post.repository.CommentRepository;
 import com.kakaotechbootcamp.community.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -98,10 +96,9 @@ public class PostService {
     }
 
     /**
-     * 게시글 리스트 조회
+     * 게시글 페이지 조회 (+페이징 및 정렬)
      */
-    public PostListResponse getPosts(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    public PostListResponse getPostPage(Pageable pageable) {
         Page<PostSummaryDto> postDtoPage = postRepository.findAllActiveWithMemberAsDto(pageable);
 
         List<PostSummaryDto> postDtos = postDtoPage.getContent();
@@ -115,7 +112,7 @@ public class PostService {
                 .map(dto -> PostSummaryResponse.fromDto(dto, commentCountMap.getOrDefault(dto.getPostId(), 0L)))
                 .toList();
 
-        return PostListResponse.of(postSummaries, page, size);
+        return PostListResponse.of(postSummaries, pageable.getPageNumber(), pageable.getPageSize());
     }
 
     private Post findByIdWithMember(Long postId) {
