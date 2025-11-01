@@ -1,6 +1,5 @@
 package com.kakaotechbootcamp.community.application.post.dto.response;
 
-import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;

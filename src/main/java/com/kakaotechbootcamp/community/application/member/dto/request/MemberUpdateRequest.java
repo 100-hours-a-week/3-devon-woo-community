@@ -4,8 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import static com.kakaotechbootcamp.community.common.validation.ValidationMessages.*;
-import static com.kakaotechbootcamp.community.common.validation.ValidationPatterns.*;
+import static com.kakaotechbootcamp.community.common.validation.ValidationMessages.INVALID_NICKNAME;
+import static com.kakaotechbootcamp.community.common.validation.ValidationMessages.INVALID_PROFILE_IMAGE;
+import static com.kakaotechbootcamp.community.common.validation.ValidationPatterns.NICKNAME_MAX_LENGTH;
+import static com.kakaotechbootcamp.community.common.validation.ValidationPatterns.URL_PATTERN;
 
 @Schema(description = "회원 정보 수정 요청 DTO")
 public record MemberUpdateRequest(

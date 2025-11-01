@@ -1,7 +1,6 @@
 package com.kakaotechbootcamp.community.application.member.dto.response;
 
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "회원 정보 수정 응답 DTO")

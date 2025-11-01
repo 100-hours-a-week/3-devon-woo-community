@@ -6,13 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 import static com.kakaotechbootcamp.community.common.validation.ValidationMessages.*;
-import static com.kakaotechbootcamp.community.common.validation.ValidationPatterns.*;
+import static com.kakaotechbootcamp.community.common.validation.ValidationPatterns.URL_PATTERN;
 
 @Schema(description = "게시글 생성 요청 DTO")
 public record PostCreateRequest(
         @Schema(description = "작성자 ID", example = "1")
-        @NotNull(message = REQUIRED_AUTHOR_ID)
-        Long authorId, // TODO: JWT 도입 후 제거 예정
+        @NotNull(message = REQUIRED_MEMBER_ID)
+        Long memberId, // TODO: JWT 도입 후 제거 예정
 
         @Schema(description = "게시글 제목", example = "This is a title.")
         @NotBlank(message = REQUIRED_POST_TITLE)

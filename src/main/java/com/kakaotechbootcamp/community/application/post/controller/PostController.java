@@ -34,8 +34,8 @@ public class PostController {
     public ApiResponse<PostResponse> createPost(
             @RequestBody @Validated PostCreateRequest request
     ) {
-        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
-        PostResponse response = postService.createPost(request, authorId);
+        Long memberId = request.memberId(); // TODO: JWT 도입 후 CurrentUser로 변경
+        PostResponse response = postService.createPost(request, memberId);
         return ApiResponse.success(response, "post_created");
     }
 
@@ -46,8 +46,8 @@ public class PostController {
             @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @RequestBody @Validated PostUpdateRequest request
     ) {
-        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
-        PostResponse response = postService.updatePost(postId, request, authorId);
+        Long memberId = request.memberId(); // TODO: JWT 도입 후 CurrentUser로 변경
+        PostResponse response = postService.updatePost(postId, request, memberId);
         return ApiResponse.success(response, "post_updated");
     }
 
@@ -59,8 +59,8 @@ public class PostController {
             @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @RequestBody @Validated PostUpdateRequest request
     ) {
-        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
-        postService.deletePost(postId, authorId);
+        Long memberId = request.memberId(); // TODO: JWT 도입 후 CurrentUser로 변경
+        postService.deletePost(postId, memberId);
     }
 
     @Operation(summary = "게시글 단건 조회", description = "특정 게시글의 상세 정보를 조회합니다.")

@@ -16,7 +16,7 @@ public record PostSummaryResponse(
         @Schema(description = "게시글 제목", example = "This is a title.")
         String title,
         @Schema(description = "작성자 정보")
-        MemberResponse author,
+        MemberResponse member,
         @Schema(description = "생성 시각")
         Instant createdAt,
         @Schema(description = "조회수", example = "100")

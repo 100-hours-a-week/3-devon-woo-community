@@ -16,7 +16,7 @@ public record CommentResponse(
         @Schema(description = "댓글 내용", example = "This is a comment.")
         String content,
         @Schema(description = "작성자 정보")
-        MemberResponse author,
+        MemberResponse member,
         @Schema(description = "생성 시각")
         Instant createdAt,
         @Schema(description = "수정 시각")

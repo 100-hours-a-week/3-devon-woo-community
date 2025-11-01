@@ -19,8 +19,8 @@ public class Post extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
-    private Member author;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Column(name = "title", length = 200, nullable = false)
     private String title;
@@ -37,10 +37,10 @@ public class Post extends BaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
-    public static Post create(Member author, String title, String content) {
-        validateCreate(author, title, content);
+    public static Post create(Member member, String title, String content) {
+        validateCreate(member, title, content);
         return Post.builder()
-                .author(author)
+                .member(member)
                 .title(title)
                 .content(content)
                 .viewsCount(0L)
@@ -89,8 +89,8 @@ public class Post extends BaseEntity {
         return this.isDeleted;
     }
 
-    private static void validateCreate(Member author, String title, String content){
-        Assert.notNull(author, "author required");
+    private static void validateCreate(Member member, String title, String content){
+        Assert.notNull(member, "member required");
         Assert.hasText(title, "title required");
         Assert.hasText(content, "content required");
 

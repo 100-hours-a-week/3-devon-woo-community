@@ -13,7 +13,7 @@ public record PostResponse(
         @Schema(description = "게시글 ID", example = "1")
         Long postId,
         @Schema(description = "작성자 정보")
-        MemberResponse author,
+        MemberResponse member,
         @Schema(description = "게시글 제목", example = "This is a title.")
         String title,
         @Schema(description = "게시글 내용", example = "This is a content.")

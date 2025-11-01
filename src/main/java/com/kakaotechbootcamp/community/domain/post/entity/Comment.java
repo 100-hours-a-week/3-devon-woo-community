@@ -23,8 +23,8 @@ public class Comment extends BaseEntity {
     private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
-    private Member author;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Column(name = "content", columnDefinition = "TEXT", nullable = false)
     private String content;
@@ -32,13 +32,13 @@ public class Comment extends BaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
-    public static Comment create(Member author, Post post, String content) {
-        Assert.notNull(author, "author required");
+    public static Comment create(Member member, Post post, String content) {
+        Assert.notNull(member, "member required");
         Assert.notNull(post, "post required");
         Assert.hasText(content, "content required");
 
         return Comment.builder()
-                .author(author)
+                .member(member)
                 .post(post)
                 .content(content)
                 .isDeleted(false)

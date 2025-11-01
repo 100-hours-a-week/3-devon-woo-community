@@ -32,8 +32,8 @@ public class CommentController {
             @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @RequestBody @Validated CommentCreateRequest request
     ) {
-        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
-        CommentResponse response = commentService.createComment(postId, request, authorId);
+        Long memberId = request.memberId(); // TODO: JWT 도입 후 CurrentUser로 변경
+        CommentResponse response = commentService.createComment(postId, request, memberId);
         return ApiResponse.success(response, "comment_created");
     }
 
@@ -64,8 +64,8 @@ public class CommentController {
             @Parameter(description = "댓글 ID") @PathVariable Long commentId,
             @RequestBody @Validated CommentUpdateRequest request
     ) {
-        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
-        CommentResponse response = commentService.updateComment(commentId, request, authorId);
+        Long memberId = request.memberId(); // TODO: JWT 도입 후 CurrentUser로 변경
+        CommentResponse response = commentService.updateComment(commentId, request, memberId);
         return ApiResponse.success(response, "comment_updated");
     }
 
@@ -77,7 +77,7 @@ public class CommentController {
             @Parameter(description = "댓글 ID") @PathVariable Long commentId,
             @RequestBody @Validated CommentUpdateRequest request
     ) {
-        Long authorId = request.authorId(); // TODO: JWT 도입 후 CurrentUser로 변경
-        commentService.deleteComment(commentId, authorId);
+        Long memberId = request.memberId(); // TODO: JWT 도입 후 CurrentUser로 변경
+        commentService.deleteComment(commentId, memberId);
     }
 }
