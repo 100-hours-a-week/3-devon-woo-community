@@ -1,6 +1,7 @@
 package com.kakaotechbootcamp.community.application.post.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -8,23 +9,26 @@ import java.util.List;
 public record PostListResponse(
         @Schema(description = "게시글 목록")
         List<PostSummaryResponse> items,
-        @Schema(description = "현재 페이지 번호", example = "0")
+
+        @Schema(description = "현재 페이지 번호 (0부터 시작)", example = "0")
         int page,
-        @Schema(description = "페이지 크기", example = "10")
+
+        @Schema(description = "페이지 크기", example = "20")
         int size,
+
         @Schema(description = "전체 게시글 수", example = "100")
         long totalElements,
-        @Schema(description = "전체 페이지 수", example = "10")
+
+        @Schema(description = "전체 페이지 수", example = "5")
         int totalPages
 ) {
-    public static PostListResponse of(List<PostSummaryResponse> posts, int page, int size) {
-
+    public static PostListResponse of(List<PostSummaryResponse> items, Page<?> page) {
         return new PostListResponse(
-                posts,
-                page,
-                size,
-                (long) posts.size(),
-                (int) Math.ceil((double) posts.size() / size)
+                items,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
         );
     }
 }

@@ -112,7 +112,7 @@ public class PostService {
                 .map(dto -> PostSummaryResponse.fromDto(dto, commentCountMap.getOrDefault(dto.getPostId(), 0L)))
                 .toList();
 
-        return PostListResponse.of(postSummaries, pageable.getPageNumber(), pageable.getPageSize());
+        return PostListResponse.of(postSummaries, postDtoPage);
     }
 
     private Post findByIdWithMember(Long postId) {
