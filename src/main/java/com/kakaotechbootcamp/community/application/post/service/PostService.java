@@ -109,13 +109,13 @@ public class PostService {
 
         List<PostQueryDto> postDtos = postDtoPage.getContent();
         List<Long> postIds = postDtos.stream()
-                .map(PostQueryDto::getPostId)
+                .map(PostQueryDto::postId)
                 .toList();
 
         Map<Long, Long> commentCountMap = commentRepository.countCommentsByPostIds(postIds);
 
         List<PostSummaryResponse> postSummaries = postDtos.stream()
-                .map(dto -> PostSummaryResponse.fromDto(dto, commentCountMap.getOrDefault(dto.getPostId(), 0L)))
+                .map(dto -> PostSummaryResponse.fromDto(dto, commentCountMap.getOrDefault(dto.postId(), 0L)))
                 .toList();
 
         return PageResponse.of(postSummaries, postDtoPage);

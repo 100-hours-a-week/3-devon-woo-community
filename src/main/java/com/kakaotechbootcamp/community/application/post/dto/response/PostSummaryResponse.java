@@ -25,16 +25,16 @@ public record PostSummaryResponse(
 ) {
     public static PostSummaryResponse fromDto(PostQueryDto dto, long commentsCount) {
         return new PostSummaryResponse(
-                dto.getPostId(),
-                dto.getTitle(),
+                dto.postId(),
+                dto.title(),
                 new MemberResponse(
-                        dto.getMemberId(),
-                        dto.getMemberNickname(),
-                        dto.getMemberEmail()
+                        dto.memberId(),
+                        dto.memberNickname(),
+                        dto.memberEmail()
                 ),
-                dto.getCreatedAt(),
-                dto.getViewsCount(),
-                dto.getLikeCount(),
+                dto.createdAt(),
+                dto.viewsCount(),
+                dto.likeCount(),
                 commentsCount
         );
     }

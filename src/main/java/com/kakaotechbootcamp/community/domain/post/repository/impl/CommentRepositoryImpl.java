@@ -1,7 +1,7 @@
 package com.kakaotechbootcamp.community.domain.post.repository.impl;
 
 import com.kakaotechbootcamp.community.domain.common.repository.QueryDslOrderUtil;
-import com.kakaotechbootcamp.community.domain.post.dto.CommentSummaryDto;
+import com.kakaotechbootcamp.community.domain.post.dto.CommentQueryDto;
 import com.kakaotechbootcamp.community.domain.post.repository.CommentQueryRepository;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
@@ -37,7 +37,7 @@ public class CommentRepositoryImpl implements CommentQueryRepository {
     );
 
     @Override
-    public Page<CommentSummaryDto> findByPostIdWithMemberAsDto(Long postId, Pageable pageable) {
+    public Page<CommentQueryDto> findByPostIdWithMemberAsDto(Long postId, Pageable pageable) {
         OrderSpecifier<?>[] orders = QueryDslOrderUtil.getOrderSpecifiersWithDefault(
                 pageable,
                 comment,
@@ -45,8 +45,8 @@ public class CommentRepositoryImpl implements CommentQueryRepository {
                 comment.createdAt.asc()
         );
 
-        List<CommentSummaryDto> content = queryFactory
-                .select(Projections.constructor(CommentSummaryDto.class,
+        List<CommentQueryDto> content = queryFactory
+                .select(Projections.constructor(CommentQueryDto.class,
                         comment.id,
                         comment.post.id,
                         comment.content,
