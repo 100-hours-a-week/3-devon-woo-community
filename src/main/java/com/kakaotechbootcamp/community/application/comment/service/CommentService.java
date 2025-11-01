@@ -4,6 +4,7 @@ import com.kakaotechbootcamp.community.application.comment.dto.request.CommentCr
 import com.kakaotechbootcamp.community.application.comment.dto.request.CommentUpdateRequest;
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentListResponse;
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentResponse;
+import com.kakaotechbootcamp.community.application.common.dto.response.PageResponse;
 import com.kakaotechbootcamp.community.application.common.validator.AccessPolicyValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.CommentErrorCode;
@@ -16,6 +17,8 @@ import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import com.kakaotechbootcamp.community.domain.post.repository.CommentRepository;
 import com.kakaotechbootcamp.community.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -65,16 +68,19 @@ public class CommentService {
         return CommentResponse.of(comment, member);
     }
 
-    public CommentListResponse getCommentsByPostId(Long postId, int page, int size) {
+    /**
+     * 게시글의 댓글 페이지 조회 (+페이징 및 정렬)
+     */
+    public PageResponse<CommentResponse> getCommentPageByPostId(Long postId, Pageable pageable) {
         findPostById(postId);
 
-        List<Comment> comments = commentRepository.findByPostId(postId);
+        Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);
 
-        List<CommentResponse> commentResponses = comments.stream()
+        List<CommentResponse> commentResponses = commentPage.getContent().stream()
                 .map(comment -> CommentResponse.of(comment, comment.getMember()))
                 .toList();
 
-        return CommentListResponse.of(postId, commentResponses, page, size);
+        return PageResponse.of(commentResponses, commentPage);
     }
 
     private Post findPostById(Long postId) {

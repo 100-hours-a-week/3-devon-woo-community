@@ -2,9 +2,10 @@ package com.kakaotechbootcamp.community.application.comment.controller;
 
 import com.kakaotechbootcamp.community.application.comment.dto.request.CommentCreateRequest;
 import com.kakaotechbootcamp.community.application.comment.dto.request.CommentUpdateRequest;
-import com.kakaotechbootcamp.community.application.comment.dto.response.CommentListResponse;
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentResponse;
 import com.kakaotechbootcamp.community.application.comment.service.CommentService;
+import com.kakaotechbootcamp.community.application.common.dto.request.PageSortRequest;
+import com.kakaotechbootcamp.community.application.common.dto.response.PageResponse;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
 import com.kakaotechbootcamp.community.common.swagger.CustomExceptionDescription;
 import com.kakaotechbootcamp.community.common.swagger.SwaggerResponseDescription;
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Comment", description = "댓글 관련 API")
 @RestController
@@ -40,13 +43,18 @@ public class CommentController {
     @Operation(summary = "게시글의 댓글 목록 조회", description = "특정 게시글의 댓글 목록을 페이징하여 조회합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.COMMENT_LIST)
     @GetMapping("/posts/{postId}/comments")
-    public ApiResponse<CommentListResponse> getCommentsByPost(
+    public ApiResponse<PageResponse<CommentResponse>> getCommentPage(
             @Parameter(description = "게시글 ID") @PathVariable Long postId,
-            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "10") int size
+            @Parameter(description = "페이지 번호", example = "0")
+            @RequestParam(required = false) Integer page,
+            @Parameter(description = "페이지 크기", example = "10")
+            @RequestParam(required = false) Integer size,
+            @Parameter(description = "정렬 기준 (필드명,방향). 다중 정렬 가능", example = "createdAt,asc")
+            @RequestParam(required = false) List<String> sort
     ) {
-        CommentListResponse response = commentService.getCommentsByPostId(postId, page, size);
-        return ApiResponse.success(response, "comment_list_fetched");
+        PageSortRequest pageSortRequest = new PageSortRequest(page, size, sort);
+        PageResponse<CommentResponse> response = commentService.getCommentPageByPostId(postId, pageSortRequest.toPageable());
+        return ApiResponse.success(response, "comments_retrieved");
     }
 
     @Operation(summary = "댓글 단건 조회", description = "특정 댓글의 상세 정보를 조회합니다.")
