@@ -32,6 +32,9 @@ public class CommentService {
     private final PostRepository postRepository;
     private final AccessPolicyValidator accessPolicyValidator;
 
+    /**
+     * 댓글 작성
+     */
     public CommentResponse createComment(Long postId, CommentCreateRequest request, Long memberId) {
         Post post = findPostById(postId);
         Member member = findMemberById(memberId);
@@ -42,6 +45,9 @@ public class CommentService {
         return CommentResponse.of(comment, member);
     }
 
+    /**
+     * 댓글 업데이튼
+     */
     public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, Long requesterId) {
         Comment comment = findCommentById(commentId);
         Member member = comment.getMember();
@@ -54,6 +60,9 @@ public class CommentService {
         return CommentResponse.of(comment, member);
     }
 
+    /**
+     * 댓글 삭제
+     */
     public void deleteComment(Long commentId, Long requesterId) {
         Comment comment = findCommentById(commentId);
         accessPolicyValidator.checkAccess(comment.getMember().getId(), requesterId);
@@ -61,6 +70,9 @@ public class CommentService {
         commentRepository.deleteById(comment.getId());
     }
 
+    /**
+     * 댓글 살세 조회
+     */
     public CommentResponse getCommentsDetails(Long commentId) {
         Comment comment = findCommentById(commentId);
         Member member = comment.getMember();
