@@ -5,7 +5,7 @@ import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRe
 import com.kakaotechbootcamp.community.application.post.dto.response.PostLikeResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostListResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
-import com.kakaotechbootcamp.community.application.post.service.PostLikeCommandService;
+import com.kakaotechbootcamp.community.application.post.service.PostLikeService;
 import com.kakaotechbootcamp.community.application.post.service.PostService;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
 import com.kakaotechbootcamp.community.common.swagger.CustomExceptionDescription;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
-    private final PostLikeCommandService postLikeCommandService;
+    private final PostLikeService postLikeService;
 
     @Operation(summary = "게시글 생성", description = "새로운 게시글을 작성합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.POST_CREATE)
@@ -89,7 +89,7 @@ public class PostController {
             @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @Parameter(description = "회원 ID") @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
-        PostLikeResponse response = postLikeCommandService.likePost(postId, memberId);
+        PostLikeResponse response = postLikeService.likePost(postId, memberId);
         return ApiResponse.success(response, "post_liked");
     }
 
@@ -100,7 +100,7 @@ public class PostController {
             @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @Parameter(description = "회원 ID") @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
-        PostLikeResponse response = postLikeCommandService.unlikePost(postId, memberId);
+        PostLikeResponse response = postLikeService.unlikePost(postId, memberId);
         return ApiResponse.success(response, "post_unliked");
     }
 }
