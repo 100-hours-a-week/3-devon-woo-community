@@ -5,6 +5,7 @@ import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRe
 import com.kakaotechbootcamp.community.application.post.dto.response.PostListResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostSummaryResponse;
+import com.kakaotechbootcamp.community.domain.post.dto.PostSummaryDto;
 import com.kakaotechbootcamp.community.application.common.validator.AccessPolicyValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
@@ -85,22 +86,17 @@ public class PostService {
 
     public PostListResponse getPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Post> postPage = postRepository.findAllActiveWithMember(pageable);
+        Page<PostSummaryDto> postDtoPage = postRepository.findAllActiveWithMemberAsDto(pageable);
 
-        List<Post> posts = postPage.getContent();
-        List<Long> postIds = posts.stream()
-                .map(Post::getId)
+        List<PostSummaryDto> postDtos = postDtoPage.getContent();
+        List<Long> postIds = postDtos.stream()
+                .map(PostSummaryDto::getPostId)
                 .toList();
 
-        // QueryDSL로 댓글 수를 DB에서 집계하여 조회 (GROUP BY 사용)
         Map<Long, Long> commentCountMap = commentRepository.countCommentsByPostIds(postIds);
 
-        List<PostSummaryResponse> postSummaries = posts.stream()
-                .map(post -> PostSummaryResponse.of(
-                        post,
-                        post.getMember(),  // 이미 fetch join으로 조회됨
-                        commentCountMap.getOrDefault(post.getId(), 0L)
-                ))
+        List<PostSummaryResponse> postSummaries = postDtos.stream()
+                .map(dto -> PostSummaryResponse.fromDto(dto, commentCountMap.getOrDefault(dto.getPostId(), 0L)))
                 .toList();
 
         return PostListResponse.of(postSummaries, page, size);

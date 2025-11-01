@@ -1,9 +1,11 @@
 package com.kakaotechbootcamp.community.domain.post.repository.impl;
 
 import com.kakaotechbootcamp.community.domain.common.repository.QueryDslOrderUtil;
+import com.kakaotechbootcamp.community.domain.post.dto.PostSummaryDto;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import com.kakaotechbootcamp.community.domain.post.repository.PostQueryRepository;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -80,6 +82,45 @@ public class PostRepositoryImpl implements PostQueryRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        JPAQuery<Long> countQuery = queryFactory
+                .select(post.count())
+                .from(post)
+                .where(post.isDeleted.eq(false));
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Page<PostSummaryDto> findAllActiveWithMemberAsDto(Pageable pageable) {
+        // 동적 정렬 적용
+        OrderSpecifier<?>[] orders = QueryDslOrderUtil.getOrderSpecifiersWithDefault(
+                pageable,
+                post,
+                ALLOWED_SORT_FIELDS,
+                post.createdAt.desc()
+        );
+
+        // Projection: 필요한 컬럼만 SELECT (fetch join 불필요)
+        List<PostSummaryDto> content = queryFactory
+                .select(Projections.constructor(PostSummaryDto.class,
+                        post.id,
+                        post.title,
+                        post.createdAt,
+                        post.viewsCount,
+                        post.likeCount,
+                        member.id,
+                        member.nickname,
+                        member.email
+                ))
+                .from(post)
+                .join(post.member, member)  // inner join (fetch join 아님)
+                .where(post.isDeleted.eq(false))
+                .orderBy(orders)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        // Count 쿼리 (동일)
         JPAQuery<Long> countQuery = queryFactory
                 .select(post.count())
                 .from(post)

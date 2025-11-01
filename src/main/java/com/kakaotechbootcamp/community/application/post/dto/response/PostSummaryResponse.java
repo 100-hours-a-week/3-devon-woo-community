@@ -1,10 +1,7 @@
 package com.kakaotechbootcamp.community.application.post.dto.response;
 
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberResponse;
-import com.kakaotechbootcamp.community.common.exception.CustomException;
-import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
-import com.kakaotechbootcamp.community.domain.member.entity.Member;
-import com.kakaotechbootcamp.community.domain.post.entity.Post;
+import com.kakaotechbootcamp.community.domain.post.dto.PostSummaryDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;
@@ -26,17 +23,18 @@ public record PostSummaryResponse(
         @Schema(description = "댓글 수", example = "5")
         Long commentsCount
 ) {
-    public static PostSummaryResponse of(Post post, Member member , long commentsCount) {
-        if (member == null) {
-            throw new CustomException(MemberErrorCode.USER_NOT_FOUND);
-        }
+    public static PostSummaryResponse fromDto(PostSummaryDto dto, long commentsCount) {
         return new PostSummaryResponse(
-                post.getId(),
-                post.getTitle(),
-                MemberResponse.of(member),
-                post.getCreatedAt(),
-                post.getViewsCount(),
-                post.getLikeCount(),
+                dto.getPostId(),
+                dto.getTitle(),
+                new MemberResponse(
+                        dto.getMemberId(),
+                        dto.getMemberNickname(),
+                        dto.getMemberEmail()
+                ),
+                dto.getCreatedAt(),
+                dto.getViewsCount(),
+                dto.getLikeCount(),
                 commentsCount
         );
     }
