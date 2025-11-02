@@ -14,7 +14,10 @@ public enum CommonErrorCode implements ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다"),
 
     // 도메인 검증 에러 (500 - 서버 내부 로직 오류)
-    INVALID_DOMAIN_STATE(HttpStatus.INTERNAL_SERVER_ERROR, "도메인 상태가 유효하지 않습니다");
+    INVALID_DOMAIN_STATE(HttpStatus.INTERNAL_SERVER_ERROR, "도메인 상태가 유효하지 않습니다"),
+
+    // 권한 에러 (403 - Forbidden)
+    NO_PERMISSION(HttpStatus.FORBIDDEN, "해당 리소스에 대한 권한이 없습니다");
 
     private final HttpStatus httpStatus;
     private final String message;

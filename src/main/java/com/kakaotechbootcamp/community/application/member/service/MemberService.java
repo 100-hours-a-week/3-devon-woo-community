@@ -35,7 +35,7 @@ public class MemberService {
     @Transactional
     public MemberUpdateResponse updateMember(Long id, MemberUpdateRequest request) {
         Member member = findMemberById(id);
-        memberValidator.checkUniqueNickname(request.nickname(), member);
+        memberValidator.validateNicknameNotDuplicated(request.nickname(), member);
 
         member.changeNickname(request.nickname());
         member.updateProfileImage(request.profileImage());
@@ -52,7 +52,7 @@ public class MemberService {
     public void updatePassword(Long id, PasswordUpdateRequest request) {
         Member member = findMemberById(id);
 
-        memberValidator.checkPasswordChangeAllowed(request, member);
+        memberValidator.validatePasswordUpdate(request, member);
 
         member.changePassword(request.newPassword());
 

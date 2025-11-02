@@ -4,11 +4,13 @@ import com.kakaotechbootcamp.community.application.common.dto.request.PageSortRe
 import com.kakaotechbootcamp.community.application.common.dto.response.PageResponse;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostCreateRequest;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRequest;
-import com.kakaotechbootcamp.community.application.post.dto.response.PostLikeResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostSummaryResponse;
+import com.kakaotechbootcamp.community.application.post.dto.ViewContext;
 import com.kakaotechbootcamp.community.application.post.service.PostLikeService;
 import com.kakaotechbootcamp.community.application.post.service.PostService;
+import com.kakaotechbootcamp.community.application.post.service.PostViewService;
+import jakarta.servlet.http.HttpServletRequest;
 import com.kakaotechbootcamp.community.common.dto.api.ApiResponse;
 import com.kakaotechbootcamp.community.common.swagger.CustomExceptionDescription;
 import com.kakaotechbootcamp.community.common.swagger.SwaggerResponseDescription;
@@ -30,6 +32,7 @@ public class PostController {
 
     private final PostService postService;
     private final PostLikeService postLikeService;
+    private final PostViewService postViewService;
 
     @Operation(summary = "게시글 생성", description = "새로운 게시글을 작성합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.POST_CREATE)
@@ -70,8 +73,16 @@ public class PostController {
     @Operation(summary = "게시글 단건 조회", description = "특정 게시글의 상세 정보를 조회합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.POST_GET)
     @GetMapping("/{postId}")
-    public ApiResponse<PostResponse> getPost(@Parameter(description = "게시글 ID") @PathVariable Long postId) {
+    public ApiResponse<PostResponse> getPost(
+            @Parameter(description = "게시글 ID") @PathVariable Long postId,
+            @Parameter(description = "회원 ID") @RequestParam Long memberId, // TODO: JWT + Security 도입 후 CurrentUser에서 추출
+            HttpServletRequest httpRequest
+    ) {
         PostResponse response = postService.getPostDetails(postId);
+
+        ViewContext context = ViewContext.from(httpRequest, memberId);
+        postViewService.incrementViewCount(postId, context);
+
         return ApiResponse.success(response, "post_retrieved");
     }
 
@@ -96,22 +107,22 @@ public class PostController {
     @Operation(summary = "게시글 좋아요", description = "게시글에 좋아요를 추가합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.POST_LIKE)
     @PostMapping("/{postId}/like")
-    public ApiResponse<PostLikeResponse> likePost(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void likePost(
             @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @Parameter(description = "회원 ID") @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
-        PostLikeResponse response = postLikeService.likePost(postId, memberId);
-        return ApiResponse.success(response, "post_liked");
+        postLikeService.likePost(postId, memberId);
     }
 
     @Operation(summary = "게시글 좋아요 취소", description = "게시글의 좋아요를 취소합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.POST_UNLIKE)
     @DeleteMapping("/{postId}/like")
-    public ApiResponse<PostLikeResponse> unlikePost(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void unlikePost(
             @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @Parameter(description = "회원 ID") @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
-        PostLikeResponse response = postLikeService.unlikePost(postId, memberId);
-        return ApiResponse.success(response, "post_unliked");
+        postLikeService.unlikePost(postId, memberId);
     }
 }

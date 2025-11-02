@@ -4,7 +4,7 @@ import com.kakaotechbootcamp.community.application.auth.dto.LoginRequest;
 import com.kakaotechbootcamp.community.application.auth.dto.LoginResponse;
 import com.kakaotechbootcamp.community.application.auth.dto.SignupRequest;
 import com.kakaotechbootcamp.community.application.auth.dto.SignupResponse;
-import com.kakaotechbootcamp.community.application.auth.validation.AuthValidationService;
+import com.kakaotechbootcamp.community.application.auth.validator.AuthValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
@@ -17,11 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
     private final MemberRepository memberRepository;
-    private final AuthValidationService authValidationService;
+    private final AuthValidator authValidator;
 
     @Transactional
     public SignupResponse signup(SignupRequest request){
-        authValidationService.validateSignupRequest(request);
+        authValidator.validateSignup(request);
 
         Member member = Member.create(
                 request.email(),
@@ -40,7 +40,7 @@ public class AuthService {
         Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(() -> new CustomException(MemberErrorCode.USER_NOT_FOUND));
 
-        authValidationService.validatePassword(request.password(), member.getPassword());
+        authValidator.validatePassword(request.password(), member.getPassword());
 
         return new LoginResponse(member.getId());
     }

@@ -4,7 +4,7 @@ import com.kakaotechbootcamp.community.application.comment.dto.request.CommentCr
 import com.kakaotechbootcamp.community.application.comment.dto.request.CommentUpdateRequest;
 import com.kakaotechbootcamp.community.application.comment.dto.response.CommentResponse;
 import com.kakaotechbootcamp.community.application.common.dto.response.PageResponse;
-import com.kakaotechbootcamp.community.application.common.validator.AccessPolicyValidator;
+import com.kakaotechbootcamp.community.domain.common.policy.OwnershipPolicy;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.CommentErrorCode;
 import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
@@ -31,7 +31,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
-    private final AccessPolicyValidator accessPolicyValidator;
+    private final OwnershipPolicy ownershipPolicy;
 
     /**
      * 댓글 작성
@@ -55,7 +55,7 @@ public class CommentService {
         Comment comment = findCommentByIdWithMember(commentId);
         Member member = comment.getMember();
 
-        accessPolicyValidator.checkAccess(comment.getMember().getId(), requesterId);
+        ownershipPolicy.validateOwnership(comment.getMember().getId(), requesterId);
 
         comment.updateContent(request.content());
         commentRepository.save(comment);
@@ -69,7 +69,7 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long commentId, Long requesterId) {
         Comment comment = findCommentByIdWithMember(commentId);
-        accessPolicyValidator.checkAccess(comment.getMember().getId(), requesterId);
+        ownershipPolicy.validateOwnership(comment.getMember().getId(), requesterId);
 
         commentRepository.deleteById(comment.getId());
     }
