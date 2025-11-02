@@ -1,7 +1,9 @@
-package com.kakaotechbootcamp.community.application.post.policy;
+package com.kakaotechbootcamp.community.domain.post.policy;
 
 import com.kakaotechbootcamp.community.application.post.dto.ViewContext;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ViewCountPolicy {
 
     public boolean shouldCount(Long postId, ViewContext context){

@@ -1,30 +1,30 @@
-package com.kakaotechbootcamp.community.application.post.validator;
+package com.kakaotechbootcamp.community.domain.post.policy;
 
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.PostErrorCode;
 import com.kakaotechbootcamp.community.domain.post.repository.PostLikeRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public class PostLikePolicyValidator {
+public class PostLikePolicy {
 
     private final PostLikeRepository postLikeRepository;
 
     /**
-     * 이미 좋아요가 된 경우
+     * 좋아요를 누를 수 있는지 검증
      */
-    public void checkNotAlreadyLiked(Long postId, Long memberId) {
+    public void validateCanLike(Long postId, Long memberId) {
         if (postLikeRepository.existsByPostIdAndMemberId(postId, memberId)) {
             throw new CustomException(PostErrorCode.ALREADY_LIKED);
         }
     }
 
     /**
-     * 이미 좋아요가 존재하는지 체크
+     * 좋아요를 취소할 수 있는지 검증
      */
-    public void checkLikeExists(Long postId, Long memberId) {
+    public void validateCanUnlike(Long postId, Long memberId) {
         if (!postLikeRepository.existsByPostIdAndMemberId(postId, memberId)) {
             throw new CustomException(PostErrorCode.LIKE_NOT_FOUND);
         }

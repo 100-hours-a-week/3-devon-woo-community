@@ -1,7 +1,7 @@
 package com.kakaotechbootcamp.community.application.post.service;
 
 import com.kakaotechbootcamp.community.application.post.dto.ViewContext;
-import com.kakaotechbootcamp.community.application.post.policy.ViewCountPolicy;
+import com.kakaotechbootcamp.community.domain.post.policy.ViewCountPolicy;
 import com.kakaotechbootcamp.community.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
