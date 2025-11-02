@@ -15,12 +15,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        use_sql_comments: true
+        use_sql_comments: false
         generate_statistics: true
         hbm2ddl:
           auto: create-drop
           jdbc_metadata_extraction_strategy: individually
-    show-sql: true
+    show-sql: false
 
   h2:
     console:
@@ -29,7 +29,9 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.hibernate.stat: DEBUG
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO
+    org.hibernate.stat: INFO
+    org.hibernate.engine.internal.StatisticalLoggingSessionEventListener: ERROR
     org.hibernate.tool.schema.internal.ExceptionHandlerLoggedImpl: ERROR
+    org.springframework.jdbc.datasource.init: WARN  # @Sql 스크립트 실행 로그 억제
