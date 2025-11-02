@@ -4,7 +4,6 @@ import com.kakaotechbootcamp.community.application.common.dto.request.PageSortRe
 import com.kakaotechbootcamp.community.application.common.dto.response.PageResponse;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostCreateRequest;
 import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRequest;
-import com.kakaotechbootcamp.community.application.post.dto.response.PostLikeResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostSummaryResponse;
 import com.kakaotechbootcamp.community.application.post.service.PostLikeService;
@@ -96,22 +95,22 @@ public class PostController {
     @Operation(summary = "게시글 좋아요", description = "게시글에 좋아요를 추가합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.POST_LIKE)
     @PostMapping("/{postId}/like")
-    public ApiResponse<PostLikeResponse> likePost(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void likePost(
             @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @Parameter(description = "회원 ID") @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
-        PostLikeResponse response = postLikeService.likePost(postId, memberId);
-        return ApiResponse.success(response, "post_liked");
+        postLikeService.likePost(postId, memberId);
     }
 
     @Operation(summary = "게시글 좋아요 취소", description = "게시글의 좋아요를 취소합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.POST_UNLIKE)
     @DeleteMapping("/{postId}/like")
-    public ApiResponse<PostLikeResponse> unlikePost(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void unlikePost(
             @Parameter(description = "게시글 ID") @PathVariable Long postId,
             @Parameter(description = "회원 ID") @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
-        PostLikeResponse response = postLikeService.unlikePost(postId, memberId);
-        return ApiResponse.success(response, "post_unliked");
+        postLikeService.unlikePost(postId, memberId);
     }
 }

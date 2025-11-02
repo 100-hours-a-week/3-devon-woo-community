@@ -1,6 +1,5 @@
 package com.kakaotechbootcamp.community.application.post.service;
 
-import com.kakaotechbootcamp.community.application.post.dto.response.PostLikeResponse;
 import com.kakaotechbootcamp.community.application.post.validator.PostLikePolicyValidator;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
@@ -28,7 +27,7 @@ public class PostLikeService {
      * 게시글 좋아요
      */
     @Transactional
-    public PostLikeResponse likePost(Long postId, Long memberId) {
+    public void likePost(Long postId, Long memberId) {
         Post post = findPostById(postId);
         Member member = findMemberById(memberId);
 
@@ -36,30 +35,18 @@ public class PostLikeService {
 
         postLikeRepository.save(PostLike.create(post, member));
         postRepository.incrementLikeCount(postId);
-
-        Long updatedLikeCount = postRepository.findById(postId)
-                .map(Post::getLikeCount)
-                .orElse(0L);
-
-        return PostLikeResponse.of(postId, updatedLikeCount);
     }
 
     /**
      * 게시글 좋아요 취소
      */
     @Transactional
-    public PostLikeResponse unlikePost(Long postId, Long memberId) {
+    public void unlikePost(Long postId, Long memberId) {
         findPostById(postId); // 게시글 존재 여부 확인
         postLikePolicyValidator.checkLikeExists(postId, memberId);
 
         postLikeRepository.deleteByPostIdAndMemberId(postId, memberId);
         postRepository.decrementLikeCount(postId);
-
-        Long updatedLikeCount = postRepository.findById(postId)
-                .map(Post::getLikeCount)
-                .orElse(0L);
-
-        return PostLikeResponse.of(postId, updatedLikeCount);
     }
 
     private Post findPostById(Long postId) {

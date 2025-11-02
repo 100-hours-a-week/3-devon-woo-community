@@ -1,6 +1,5 @@
 package com.kakaotechbootcamp.community.application.post.service;
 
-import com.kakaotechbootcamp.community.application.post.dto.response.PostLikeResponse;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.PostErrorCode;
 import com.kakaotechbootcamp.community.config.EnableSqlLogging;
@@ -52,13 +51,9 @@ class PostLikeServiceIntegrationTest {
     @DisplayName("게시글 좋아요 추가 성공")
     void likePost_Success() {
         // when
-        PostLikeResponse response = postLikeService.likePost(TEST_POST_ID, TEST_MEMBER2_ID);
+        postLikeService.likePost(TEST_POST_ID, TEST_MEMBER2_ID);
 
-        // then
-        assertThat(response.postId()).isEqualTo(TEST_POST_ID);
-        assertThat(response.likeCount()).isEqualTo(1L);
-
-        // DB 검증
+        // then - DB 검증
         Post updatedPost = postRepository.findById(TEST_POST_ID).orElseThrow();
         assertThat(updatedPost.getLikeCount()).isEqualTo(1L);
 
@@ -78,13 +73,9 @@ class PostLikeServiceIntegrationTest {
         jdbcTemplate.update("UPDATE post SET like_count = 1 WHERE id = ?", TEST_POST_ID);
 
         // when
-        PostLikeResponse response = postLikeService.unlikePost(TEST_POST_ID, TEST_MEMBER2_ID);
+        postLikeService.unlikePost(TEST_POST_ID, TEST_MEMBER2_ID);
 
-        // then
-        assertThat(response.postId()).isEqualTo(TEST_POST_ID);
-        assertThat(response.likeCount()).isEqualTo(0L);
-
-        // DB 검증
+        // then - DB 검증
         Post updatedPost = postRepository.findById(TEST_POST_ID).orElseThrow();
         assertThat(updatedPost.getLikeCount()).isEqualTo(0L);
 
