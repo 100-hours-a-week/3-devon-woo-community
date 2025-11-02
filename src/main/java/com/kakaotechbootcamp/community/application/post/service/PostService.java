@@ -94,9 +94,6 @@ public class PostService {
         Attachment attachment = attachmentRepository.findByPostId(postId)
                 .orElse(null);
 
-        post.incrementViews();
-        postRepository.save(post);
-
         return PostResponse.of(post, member, attachment);
     }
 
