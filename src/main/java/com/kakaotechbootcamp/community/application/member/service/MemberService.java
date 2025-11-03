@@ -35,10 +35,15 @@ public class MemberService {
     @Transactional
     public MemberUpdateResponse updateMember(Long id, MemberUpdateRequest request) {
         Member member = findMemberById(id);
-        memberValidator.validateNicknameNotDuplicated(request.nickname(), member);
 
-        member.changeNickname(request.nickname());
-        member.updateProfileImage(request.profileImage());
+        if (request.nickname() != null) {
+            memberValidator.validateNicknameNotDuplicated(request.nickname(), member);
+            member.changeNickname(request.nickname());
+        }
+
+        if (request.profileImage() != null) {
+            member.updateProfileImage(request.profileImage());
+        }
 
         memberRepository.save(member);
 

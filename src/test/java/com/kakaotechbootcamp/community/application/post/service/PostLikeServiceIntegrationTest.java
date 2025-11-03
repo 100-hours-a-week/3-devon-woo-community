@@ -124,12 +124,12 @@ class PostLikeServiceIntegrationTest {
     @DisplayName("여러 사용자가 동시에 좋아요 추가 - 원자적 업데이트 검증")
     void likePost_ConcurrentLikes_AtomicUpdate() throws InterruptedException {
         // given
-        int numberOfThreads = 10;
+        int numberOfThreads = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
         AtomicInteger successCount = new AtomicInteger(0);
 
-        // 10명의 테스트 회원을 SQL로 생성
+        // 100명의 테스트 회원을 SQL로 생성
         for (int i = 0; i < numberOfThreads; i++) {
             long memberId = 100L + i;
             jdbcTemplate.update(
@@ -144,7 +144,7 @@ class PostLikeServiceIntegrationTest {
             );
         }
 
-        // when - 10명이 동시에 좋아요 추가
+        // when - 100명이 동시에 좋아요 추가
         for (int i = 0; i < numberOfThreads; i++) {
             long memberId = 100L + i;
             executorService.execute(() -> {
@@ -162,7 +162,7 @@ class PostLikeServiceIntegrationTest {
         latch.await();
         executorService.shutdown();
 
-        // then - 좋아요 수가 정확히 10개여야 함
+        // then - 좋아요 수가 정확히 100개여야 함
         Post updatedPost = postRepository.findById(TEST_POST_ID).orElseThrow();
         assertThat(updatedPost.getLikeCount()).isEqualTo(numberOfThreads);
         assertThat(successCount.get()).isEqualTo(numberOfThreads);
@@ -173,11 +173,11 @@ class PostLikeServiceIntegrationTest {
     @DisplayName("동시에 좋아요 추가/취소 - 최종 카운트 일관성 검증")
     void likeAndUnlikePost_ConcurrentOperations_ConsistentCount() throws InterruptedException {
         // given
-        int numberOfThreads = 20; // 10개는 좋아요, 10개는 좋아요 취소
+        int numberOfThreads = 100; // 50개는 좋아요, 50개는 좋아요 취소
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
-        // 20명의 테스트 회원 생성 및 좋아요 추가를 SQL로 처리
+        // 100명의 테스트 회원 생성 및 좋아요 추가를 SQL로 처리
         for (int i = 0; i < numberOfThreads; i++) {
             long memberId = 200L + i;
             // 회원 생성
@@ -210,10 +210,10 @@ class PostLikeServiceIntegrationTest {
             executorService.execute(() -> {
                 try {
                     if (shouldUnlike) {
-                        // 첫 10명은 좋아요 취소
+                        // 첫 50명은 좋아요 취소
                         postLikeService.unlikePost(TEST_POST_ID, memberId);
                     } else {
-                        // 나머지 10명은 이미 좋아요 했으므로 재추가 시도 (실패)
+                        // 나머지 50명은 이미 좋아요 했으므로 재추가 시도 (실패)
                         try {
                             postLikeService.likePost(TEST_POST_ID, memberId);
                         } catch (CustomException e) {
@@ -231,7 +231,7 @@ class PostLikeServiceIntegrationTest {
         latch.await();
         executorService.shutdown();
 
-        // then - 최종 좋아요 수는 10개여야 함 (20개 - 10개 취소)
+        // then - 최종 좋아요 수는 50개여야 함 (100개 - 50개 취소)
         Post updatedPost = postRepository.findById(TEST_POST_ID).orElseThrow();
         assertThat(updatedPost.getLikeCount()).isEqualTo(numberOfThreads / 2);
     }

@@ -28,11 +28,16 @@ public class PostLikeService {
      */
     @Transactional
     public void likePost(Long postId, Long memberId) {
-        Post post = findPostById(postId);
-        Member member = findMemberById(memberId);
+        Post post = postRepository.findByIdWithMember(postId)
+                .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
+
+        if (!memberRepository.existsById(memberId)) {
+            throw new CustomException(MemberErrorCode.USER_NOT_FOUND);
+        }
 
         postLikePolicy.validateCanLike(postId, memberId);
 
+        Member member = memberRepository.getReferenceById(memberId);
         postLikeRepository.save(PostLike.create(post, member));
         postRepository.incrementLikeCount(postId);
     }
@@ -42,20 +47,13 @@ public class PostLikeService {
      */
     @Transactional
     public void unlikePost(Long postId, Long memberId) {
-        findPostById(postId); // 게시글 존재 여부 확인
+        if(!postRepository.existsById(postId)){
+            throw new CustomException(PostErrorCode.POST_NOT_FOUND);
+        }
         postLikePolicy.validateCanUnlike(postId, memberId);
 
         postLikeRepository.deleteByPostIdAndMemberId(postId, memberId);
         postRepository.decrementLikeCount(postId);
     }
 
-    private Post findPostById(Long postId) {
-        return postRepository.findByIdWithMember(postId)
-                .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
-    }
-
-    private Member findMemberById(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(MemberErrorCode.USER_NOT_FOUND));
-    }
 }

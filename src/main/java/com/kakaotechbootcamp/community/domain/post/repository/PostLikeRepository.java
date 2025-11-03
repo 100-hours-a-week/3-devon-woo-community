@@ -2,12 +2,13 @@ package com.kakaotechbootcamp.community.domain.post.repository;
 
 import com.kakaotechbootcamp.community.domain.post.entity.PostLike;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.Optional;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
-    boolean existsByPostIdAndMemberId(Long postId, Long memberId);
+    @Query("SELECT CASE WHEN COUNT(pl) > 0 THEN true ELSE false END FROM PostLike pl WHERE pl.id.postId = :postId AND pl.id.memberId = :memberId")
+    boolean existsByPostIdAndMemberId(@Param("postId") Long postId, @Param("memberId") Long memberId);
 
     void deleteByPostIdAndMemberId(Long postId, Long memberId);
 

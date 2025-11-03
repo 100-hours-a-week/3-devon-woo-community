@@ -10,8 +10,8 @@ import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment, Long>, CommentQueryRepository {
 
-    @Query("SELECT c FROM Comment c JOIN FETCH c.member WHERE c.post.id = :postId ORDER BY c.createdAt ASC")
-    Optional<Comment> findByIdWithMember(@Param("postId") Long postId);
+    @Query("SELECT c FROM Comment c JOIN FETCH c.member WHERE c.id = :commentId")
+    Optional<Comment> findByIdWithMember(@Param("commentId") Long commentId);
 
     @Query("SELECT c FROM Comment c JOIN FETCH c.post WHERE c.member.id = :memberId ORDER BY c.createdAt DESC")
     List<Comment> findByMemberIdWithPost(@Param("memberId") Long memberId);
