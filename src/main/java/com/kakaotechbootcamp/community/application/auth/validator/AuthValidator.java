@@ -1,23 +1,29 @@
-package com.kakaotechbootcamp.community.application.auth.validation;
+package com.kakaotechbootcamp.community.application.auth.validator;
 
 import com.kakaotechbootcamp.community.application.auth.dto.SignupRequest;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public class AuthValidationService {
+public class AuthValidator {
 
     private final MemberRepository memberRepository;
 
-    public void validateSignupRequest(SignupRequest request) {
+    /**
+     * 회원가입 요청 검증
+     */
+    public void validateSignup(SignupRequest request) {
         validateEmailNotDuplicated(request.email());
         validateNicknameNotDuplicated(request.nickname());
     }
 
+    /**
+     * 비밀번호 일치 여부 검증
+     */
     public void validatePassword(String rawPassword, String storedPassword) {
         if (!rawPassword.equals(storedPassword)) {
             throw new CustomException(MemberErrorCode.INVALID_PASSWORD);

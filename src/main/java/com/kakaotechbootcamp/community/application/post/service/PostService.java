@@ -6,7 +6,7 @@ import com.kakaotechbootcamp.community.application.post.dto.request.PostUpdateRe
 import com.kakaotechbootcamp.community.application.post.dto.response.PostResponse;
 import com.kakaotechbootcamp.community.application.post.dto.response.PostSummaryResponse;
 import com.kakaotechbootcamp.community.domain.post.dto.PostQueryDto;
-import com.kakaotechbootcamp.community.application.common.validator.AccessPolicyValidator;
+import com.kakaotechbootcamp.community.domain.common.policy.OwnershipPolicy;
 import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
 import com.kakaotechbootcamp.community.common.exception.code.PostErrorCode;
@@ -34,7 +34,7 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final AttachmentRepository attachmentRepository;
     private final CommentRepository commentRepository;
-    private final AccessPolicyValidator accessPolicyValidator;
+    private final OwnershipPolicy ownershipPolicy;
 
 
     /**
@@ -60,7 +60,7 @@ public class PostService {
         Post post = findByIdWithMember(postId);
         Member member = findMemberById(memberId);
 
-        accessPolicyValidator.checkAccess(post.getMember().getId(), memberId);
+        ownershipPolicy.validateOwnership(post.getMember().getId(), memberId);
 
         post.updatePost(request.title(), request.content());
         Post savedPost = postRepository.save(post);
@@ -78,7 +78,7 @@ public class PostService {
     @Transactional
     public void deletePost(Long postId, Long memberId) {
         Post post = findByIdWithMember(postId);
-        accessPolicyValidator.checkAccess(post.getMember().getId(), memberId);
+        ownershipPolicy.validateOwnership(post.getMember().getId(), memberId);
 
         postRepository.deleteById(postId);
     }
