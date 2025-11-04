@@ -30,11 +30,14 @@ public class PostLikeService {
     public void likePost(Long postId, Long memberId) {
         Post post = postRepository.findByIdWithMember(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(MemberErrorCode.USER_NOT_FOUND));
+
+        if (!memberRepository.existsById(memberId)) {
+            throw new CustomException(MemberErrorCode.USER_NOT_FOUND);
+        }
 
         postLikePolicy.validateCanLike(postId, memberId);
 
+        Member member = memberRepository.getReferenceById(memberId);
         postLikeRepository.save(PostLike.create(post, member));
         postRepository.incrementLikeCount(postId);
     }
