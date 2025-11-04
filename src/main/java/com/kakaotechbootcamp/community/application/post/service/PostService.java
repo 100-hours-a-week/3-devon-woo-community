@@ -46,8 +46,10 @@ public class PostService {
 
         Post post = Post.create(member, request.title(), request.content());
         Post savedPost = postRepository.save(post);
-        Attachment attachment = Attachment.create(savedPost, request.image());
-        Attachment savedAttachment = attachmentRepository.save(attachment);
+
+        Attachment savedAttachment = Optional.ofNullable(request.image())
+                .map(img -> attachmentRepository.save(Attachment.create(savedPost, img)))
+                .orElse(null);
 
         return PostResponse.of(savedPost, member, savedAttachment);
     }
