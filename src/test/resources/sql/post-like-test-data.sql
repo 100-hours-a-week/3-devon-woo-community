@@ -5,5 +5,5 @@ VALUES
     (2, 'test2@example.com', 'password123!', 'tester2', 'https://example.com/profile2.jpg', 'ACTIVE', NULL);
 
 -- 테스트 게시글 데이터
-INSERT INTO post (id, member_id, title, content, views_count, like_count, is_deleted, created_at, updated_at)
-VALUES (1, 1, 'Test Post', 'Test Content', 0, 0, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO post (id, member_id, title, content, views_count, like_count, comment_count, is_deleted, created_at, updated_at)
+VALUES (1, 1, 'Test Post', 'Test Content', 0, 0, 0, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
