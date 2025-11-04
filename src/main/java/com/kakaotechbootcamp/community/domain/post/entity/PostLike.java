@@ -6,6 +6,7 @@ import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.post.entity.id.PostLikeId;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.domain.Persistable;
 import org.springframework.util.Assert;
 
 @Entity
@@ -14,7 +15,7 @@ import org.springframework.util.Assert;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "post_like")
-public class PostLike extends CreatedOnlyEntity {
+public class PostLike extends CreatedOnlyEntity implements Persistable<PostLikeId> {
 
     @EmbeddedId
     private PostLikeId id;
@@ -41,5 +42,10 @@ public class PostLike extends CreatedOnlyEntity {
     private static void validateCreate(Post post, Member member) {
         Assert.notNull(post, "post required");
         Assert.notNull(member, "member required");
+    }
+
+    @Override
+    public boolean isNew() {
+        return getCreatedAt() == null;
     }
 }
