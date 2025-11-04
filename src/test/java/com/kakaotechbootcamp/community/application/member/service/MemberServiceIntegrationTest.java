@@ -127,7 +127,7 @@ class MemberServiceIntegrationTest {
 
         // DB 검증
         Member updatedMember = memberRepository.findById(TEST_MEMBER1_ID).orElseThrow();
-        assertThat(updatedMember.getNickname()).isEqualTo("updated_nickname");
+        assertThat(updatedMember.getNickname()).isEqualTo("up_nick");
         assertThat(updatedMember.getProfileImageUrl()).isEqualTo("https://example.com/updated-profile.jpg");
     }
 
