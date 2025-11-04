@@ -5,10 +5,10 @@ VALUES
     (2, 'test2@example.com', 'password123!', 'tester2', 'https://example.com/profile2.jpg', 'ACTIVE', NULL);
 
 -- 테스트 게시글 데이터
-INSERT INTO post (id, member_id, title, content, views_count, like_count, is_deleted, created_at, updated_at)
+INSERT INTO post (id, member_id, title, content, views_count, like_count, comment_count, is_deleted, created_at, updated_at)
 VALUES
-    (1, 1, 'Test Post 1', 'Test Content 1', 0, 0, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (2, 2, 'Test Post 2', 'Test Content 2', 0, 0, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    (1, 1, 'Test Post 1', 'Test Content 1', 0, 0, 2, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    (2, 2, 'Test Post 2', 'Test Content 2', 0, 0, 0, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 테스트 댓글 데이터
 INSERT INTO comment (id, post_id, member_id, content, is_deleted, created_at, updated_at)

@@ -12,6 +12,7 @@ public record PostQueryDto(
         Instant createdAt,
         Long viewsCount,
         Long likeCount,
+        Long commentCount,
         Long memberId,
         String memberNickname,
         String memberEmail

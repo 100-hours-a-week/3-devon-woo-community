@@ -53,6 +53,7 @@ public class PostRepositoryImpl implements PostQueryRepository {
                         post.createdAt,
                         post.viewsCount,
                         post.likeCount,
+                        post.commentCount,
                         member.id,
                         member.nickname,
                         member.email

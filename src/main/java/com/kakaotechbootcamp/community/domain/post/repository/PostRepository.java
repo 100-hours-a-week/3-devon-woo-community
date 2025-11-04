@@ -25,4 +25,12 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostQueryRepo
     @Query("UPDATE Post p SET p.viewsCount = p.viewsCount + 1 WHERE p.id = :postId")
     int incrementViewCount(@Param("postId") Long postId);
 
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Post p SET p.commentCount = p.commentCount + 1 WHERE p.id = :postId")
+    int incrementCommentCount(@Param("postId") Long postId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Post p SET p.commentCount = p.commentCount - 1 WHERE p.id = :postId AND p.commentCount > 0")
+    int decrementCommentCount(@Param("postId") Long postId);
+
 }

@@ -34,6 +34,9 @@ public class Post extends BaseTimeEntity {
     @Column(name = "like_count", nullable = false)
     private Long likeCount;
 
+    @Column(name = "comment_count", nullable = false)
+    private Long commentCount;
+
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
@@ -45,6 +48,7 @@ public class Post extends BaseTimeEntity {
                 .content(content)
                 .viewsCount(0L)
                 .likeCount(0L)
+                .commentCount(0L)
                 .isDeleted(false)
                 .build();
     }

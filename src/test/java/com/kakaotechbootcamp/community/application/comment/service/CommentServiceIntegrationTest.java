@@ -12,7 +12,9 @@ import com.kakaotechbootcamp.community.common.exception.code.PostErrorCode;
 import com.kakaotechbootcamp.community.config.EnableSqlLogging;
 import com.kakaotechbootcamp.community.config.TestConfig;
 import com.kakaotechbootcamp.community.domain.post.entity.Comment;
+import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import com.kakaotechbootcamp.community.domain.post.repository.CommentRepository;
+import com.kakaotechbootcamp.community.domain.post.repository.PostRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -39,6 +47,9 @@ class CommentServiceIntegrationTest {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private PostRepository postRepository;
 
     private static final Long TEST_MEMBER1_ID = 1L;
     private static final Long TEST_MEMBER2_ID = 2L;
@@ -346,5 +357,285 @@ class CommentServiceIntegrationTest {
         // then
         assertThat(page.totalElements()).isEqualTo(0L);
         assertThat(page.items()).isEmpty();
+    }
+
+    @Test
+    @EnableSqlLogging
+    @DisplayName("댓글 추가 시 게시글의 commentCount가 증가함")
+    @Transactional
+    void createComment_IncrementsPostCommentCount() {
+        // given - 초기 상태 확인
+        Post post = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        Long initialCommentCount = post.getCommentCount();
+
+        CommentCreateRequest request = new CommentCreateRequest(
+                TEST_MEMBER1_ID,
+                "새 댓글입니다"
+        );
+
+        // when
+        commentService.createComment(TEST_POST1_ID, request, TEST_MEMBER1_ID);
+
+        // then - commentCount가 1 증가해야 함
+        Post updatedPost = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        assertThat(updatedPost.getCommentCount()).isEqualTo(initialCommentCount + 1);
+    }
+
+    @Test
+    @EnableSqlLogging
+    @DisplayName("댓글 삭제 시 게시글의 commentCount가 감소함")
+    @Transactional
+    void deleteComment_DecrementsPostCommentCount() {
+        // given - 초기 상태 확인
+        Post post = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        Long initialCommentCount = post.getCommentCount();
+
+        // when
+        commentService.deleteComment(TEST_COMMENT1_ID, TEST_MEMBER1_ID);
+
+        // then - commentCount가 1 감소해야 함
+        Post updatedPost = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        assertThat(updatedPost.getCommentCount()).isEqualTo(initialCommentCount - 1);
+    }
+
+    @Test
+    @EnableSqlLogging
+    @DisplayName("여러 댓글 추가 후 commentCount가 정확히 계산됨")
+    @Transactional
+    void createMultipleComments_CommentCountAccurate() {
+        // given - 초기 상태 확인
+        Post post = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        Long initialCommentCount = post.getCommentCount();
+
+        // when - 3개의 댓글 추가
+        for (int i = 0; i < 3; i++) {
+            CommentCreateRequest request = new CommentCreateRequest(
+                    TEST_MEMBER1_ID,
+                    "댓글 " + i
+            );
+            commentService.createComment(TEST_POST1_ID, request, TEST_MEMBER1_ID);
+        }
+
+        // then - commentCount가 3 증가해야 함
+        Post updatedPost = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        assertThat(updatedPost.getCommentCount()).isEqualTo(initialCommentCount + 3);
+    }
+
+    @Test
+    @EnableSqlLogging
+    @DisplayName("댓글 추가 후 삭제 시 commentCount가 원래대로 복구됨")
+    @Transactional
+    void createAndDeleteComment_CommentCountRestored() {
+        // given - 초기 상태 확인
+        Post initialPost = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        Long initialCommentCount = initialPost.getCommentCount();
+
+        // when - 댓글 추가
+        CommentCreateRequest request = new CommentCreateRequest(
+                TEST_MEMBER1_ID,
+                "임시 댓글"
+        );
+        CommentResponse createdComment = commentService.createComment(TEST_POST1_ID, request, TEST_MEMBER1_ID);
+
+        // 추가 후 확인
+        Post postAfterCreate = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        assertThat(postAfterCreate.getCommentCount()).isEqualTo(initialCommentCount + 1);
+
+        // 댓글 삭제
+        commentService.deleteComment(createdComment.commentId(), TEST_MEMBER1_ID);
+
+        // then - commentCount가 원래대로 복구되어야 함
+        Post finalPost = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        assertThat(finalPost.getCommentCount()).isEqualTo(initialCommentCount);
+    }
+
+    @Test
+    @EnableSqlLogging
+    @DisplayName("commentCount가 0일 때 댓글 삭제 시 음수가 되지 않음")
+    @Transactional
+    void deleteComment_CommentCountNotNegative() {
+        // given - TEST_POST2_ID는 댓글이 없음 (commentCount = 0)
+        Post post = postRepository.findById(TEST_POST2_ID).orElseThrow();
+        assertThat(post.getCommentCount()).isEqualTo(0L);
+
+        // 댓글 하나 추가
+        CommentCreateRequest request = new CommentCreateRequest(
+                TEST_MEMBER1_ID,
+                "새 댓글"
+        );
+        CommentResponse createdComment = commentService.createComment(TEST_POST2_ID, request, TEST_MEMBER1_ID);
+
+        // when - 댓글 삭제
+        commentService.deleteComment(createdComment.commentId(), TEST_MEMBER1_ID);
+
+        // then - commentCount가 0이어야 함 (음수 아님)
+        Post updatedPost = postRepository.findById(TEST_POST2_ID).orElseThrow();
+        assertThat(updatedPost.getCommentCount()).isEqualTo(0L);
+    }
+
+    @Test
+    @EnableSqlLogging
+    @DisplayName("서로 다른 게시글의 commentCount는 독립적으로 계산됨")
+    @Transactional
+    void commentCount_IndependentForDifferentPosts() {
+        // given - 초기 상태 확인
+        Post post1 = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        Post post2 = postRepository.findById(TEST_POST2_ID).orElseThrow();
+        Long initialCount1 = post1.getCommentCount();
+        Long initialCount2 = post2.getCommentCount();
+
+        // when - POST1에만 댓글 추가
+        CommentCreateRequest request = new CommentCreateRequest(
+                TEST_MEMBER1_ID,
+                "POST1의 댓글"
+        );
+        commentService.createComment(TEST_POST1_ID, request, TEST_MEMBER1_ID);
+
+        // then - POST1의 commentCount만 증가하고 POST2는 그대로
+        Post updatedPost1 = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        Post updatedPost2 = postRepository.findById(TEST_POST2_ID).orElseThrow();
+
+        assertThat(updatedPost1.getCommentCount()).isEqualTo(initialCount1 + 1);
+        assertThat(updatedPost2.getCommentCount()).isEqualTo(initialCount2);
+    }
+
+    @Test
+    @EnableSqlLogging
+    @DisplayName("100개의 댓글이 동시에 추가될 때 commentCount가 정확히 계산됨")
+    void createComments_Concurrency_CommentCountAccurate() throws InterruptedException {
+        // given
+        int threadCount = 100;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+        AtomicInteger successCount = new AtomicInteger(0);
+        AtomicInteger failCount = new AtomicInteger(0);
+
+        Post initialPost = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        Long initialCommentCount = initialPost.getCommentCount();
+
+        // when - 100개의 스레드에서 동시에 댓글 추가
+        for (int i = 0; i < threadCount; i++) {
+            final int index = i;
+            executorService.submit(() -> {
+                try {
+                    CommentCreateRequest request = new CommentCreateRequest(
+                            TEST_MEMBER1_ID,
+                            "동시성 테스트 댓글 " + index
+                    );
+                    commentService.createComment(TEST_POST1_ID, request, TEST_MEMBER1_ID);
+                    successCount.incrementAndGet();
+                } catch (Exception e) {
+                    failCount.incrementAndGet();
+                    System.err.println("댓글 생성 실패 [" + index + "]: " + e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        // 모든 스레드가 완료될 때까지 대기 (최대 30초)
+        boolean completed = latch.await(30, TimeUnit.SECONDS);
+        executorService.shutdown();
+
+        // then
+        assertThat(completed).isTrue(); // 모든 스레드가 완료되었는지 확인
+
+        // DB에서 최종 상태 확인
+        Post finalPost = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        long actualCommentCount = commentRepository.count();
+
+        System.out.println("초기 commentCount: " + initialCommentCount);
+        System.out.println("성공한 댓글 추가: " + successCount.get());
+        System.out.println("실패한 댓글 추가: " + failCount.get());
+        System.out.println("최종 commentCount (Post): " + finalPost.getCommentCount());
+        System.out.println("실제 댓글 수 (DB): " + actualCommentCount);
+
+        // commentCount가 성공적으로 추가된 댓글 수만큼 증가했는지 확인
+        assertThat(finalPost.getCommentCount()).isEqualTo(initialCommentCount + successCount.get());
+
+        // 실제 DB의 댓글 수와 Post의 commentCount가 일치하는지 확인
+        long commentsForPost1 = commentRepository.findAll().stream()
+                .filter(c -> c.getPost().getId().equals(TEST_POST1_ID))
+                .count();
+        assertThat(finalPost.getCommentCount()).isEqualTo(commentsForPost1);
+    }
+
+    @Test
+    @EnableSqlLogging
+    @DisplayName("동시에 댓글 추가와 삭제가 발생해도 commentCount가 정확히 계산됨")
+    void createAndDeleteComments_Concurrency_CommentCountAccurate() throws InterruptedException {
+        // given - 먼저 10개의 댓글을 추가
+        Long[] commentIds = new Long[10];
+        for (int i = 0; i < 10; i++) {
+            CommentCreateRequest request = new CommentCreateRequest(
+                    TEST_MEMBER1_ID,
+                    "삭제용 댓글 " + i
+            );
+            CommentResponse response = commentService.createComment(TEST_POST1_ID, request, TEST_MEMBER1_ID);
+            commentIds[i] = response.commentId();
+        }
+
+        Post postAfterSetup = postRepository.findById(TEST_POST1_ID).orElseThrow();
+        Long initialCommentCount = postAfterSetup.getCommentCount();
+
+        // when - 50개는 추가, 10개는 삭제를 동시에 실행
+        int totalThreads = 60;
+        ExecutorService executorService = Executors.newFixedThreadPool(totalThreads);
+        CountDownLatch latch = new CountDownLatch(totalThreads);
+        AtomicInteger addSuccess = new AtomicInteger(0);
+        AtomicInteger deleteSuccess = new AtomicInteger(0);
+
+        // 50개 추가
+        for (int i = 0; i < 50; i++) {
+            final int index = i;
+            executorService.submit(() -> {
+                try {
+                    CommentCreateRequest request = new CommentCreateRequest(
+                            TEST_MEMBER1_ID,
+                            "동시성 추가 댓글 " + index
+                    );
+                    commentService.createComment(TEST_POST1_ID, request, TEST_MEMBER1_ID);
+                    addSuccess.incrementAndGet();
+                } catch (Exception e) {
+                    System.err.println("댓글 추가 실패: " + e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        // 10개 삭제
+        for (int i = 0; i < 10; i++) {
+            final Long commentId = commentIds[i];
+            executorService.submit(() -> {
+                try {
+                    commentService.deleteComment(commentId, TEST_MEMBER1_ID);
+                    deleteSuccess.incrementAndGet();
+                } catch (Exception e) {
+                    System.err.println("댓글 삭제 실패: " + e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        // 모든 스레드가 완료될 때까지 대기
+        boolean completed = latch.await(30, TimeUnit.SECONDS);
+        executorService.shutdown();
+
+        // then
+        assertThat(completed).isTrue();
+
+        Post finalPost = postRepository.findById(TEST_POST1_ID).orElseThrow();
+
+        System.out.println("초기 commentCount: " + initialCommentCount);
+        System.out.println("추가 성공: " + addSuccess.get());
+        System.out.println("삭제 성공: " + deleteSuccess.get());
+        System.out.println("예상 commentCount: " + (initialCommentCount + addSuccess.get() - deleteSuccess.get()));
+        System.out.println("실제 commentCount: " + finalPost.getCommentCount());
+
+        // commentCount = 초기값 + 추가 성공 - 삭제 성공
+        Long expectedCount = initialCommentCount + addSuccess.get() - deleteSuccess.get();
+        assertThat(finalPost.getCommentCount()).isEqualTo(expectedCount);
     }
 }
