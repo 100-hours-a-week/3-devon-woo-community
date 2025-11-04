@@ -38,7 +38,8 @@ public class CommentService {
      */
     @Transactional
     public CommentResponse createComment(Long postId, CommentCreateRequest request, Long memberId) {
-        Post post = findPostById(postId);
+        validatePostExists(postId);  // SELECT 1 쿼리로 게시글 존재 확인
+        Post post = postRepository.getReferenceById(postId);  // Proxy 객체, 쿼리 발생 안 함
         Member member = findMemberById(memberId);
 
         Comment comment = Comment.create(member, post, request.content());
@@ -89,7 +90,7 @@ public class CommentService {
      */
     @Transactional(readOnly = true)
     public PageResponse<CommentResponse> getCommentPageByPostId(Long postId, Pageable pageable) {
-        findPostById(postId);
+        validatePostExists(postId);
 
         Page<CommentQueryDto> commentDtoPage = commentRepository.findByPostIdWithMemberAsDto(postId, pageable);
 
@@ -100,9 +101,10 @@ public class CommentService {
         return PageResponse.of(commentResponses, commentDtoPage);
     }
 
-    private Post findPostById(Long postId) {
-        return postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
+    private void validatePostExists(Long postId) {
+        if (!postRepository.existsById(postId)) {
+            throw new CustomException(PostErrorCode.POST_NOT_FOUND);
+        }
     }
 
     private Comment findCommentByIdWithMember(Long commentId) {
