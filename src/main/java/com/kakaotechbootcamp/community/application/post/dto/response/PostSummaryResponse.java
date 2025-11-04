@@ -23,7 +23,7 @@ public record PostSummaryResponse(
         @Schema(description = "댓글 수", example = "5")
         Long commentsCount
 ) {
-    public static PostSummaryResponse fromDto(PostQueryDto dto, long commentsCount) {
+    public static PostSummaryResponse fromDto(PostQueryDto dto) {
         return new PostSummaryResponse(
                 dto.postId(),
                 dto.title(),
@@ -35,7 +35,7 @@ public record PostSummaryResponse(
                 dto.createdAt(),
                 dto.viewsCount(),
                 dto.likeCount(),
-                commentsCount
+                dto.commentCount()
         );
     }
 }

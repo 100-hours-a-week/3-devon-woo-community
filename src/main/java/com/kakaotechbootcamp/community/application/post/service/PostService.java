@@ -15,7 +15,6 @@ import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository
 import com.kakaotechbootcamp.community.domain.post.entity.Attachment;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import com.kakaotechbootcamp.community.domain.post.repository.AttachmentRepository;
-import com.kakaotechbootcamp.community.domain.post.repository.CommentRepository;
 import com.kakaotechbootcamp.community.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -33,7 +31,6 @@ public class PostService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final AttachmentRepository attachmentRepository;
-    private final CommentRepository commentRepository;
     private final OwnershipPolicy ownershipPolicy;
 
 
@@ -106,15 +103,8 @@ public class PostService {
     public PageResponse<PostSummaryResponse> getPostPage(Pageable pageable) {
         Page<PostQueryDto> postDtoPage = postRepository.findAllActiveWithMemberAsDto(pageable);
 
-        List<PostQueryDto> postDtos = postDtoPage.getContent();
-        List<Long> postIds = postDtos.stream()
-                .map(PostQueryDto::postId)
-                .toList();
-
-        Map<Long, Long> commentCountMap = commentRepository.countCommentsByPostIds(postIds);
-
-        List<PostSummaryResponse> postSummaries = postDtos.stream()
-                .map(dto -> PostSummaryResponse.fromDto(dto, commentCountMap.getOrDefault(dto.postId(), 0L)))
+        List<PostSummaryResponse> postSummaries = postDtoPage.getContent().stream()
+                .map(PostSummaryResponse::fromDto)
                 .toList();
 
         return PageResponse.of(postSummaries, postDtoPage);

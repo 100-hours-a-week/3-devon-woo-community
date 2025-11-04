@@ -38,12 +38,14 @@ public class CommentService {
      */
     @Transactional
     public CommentResponse createComment(Long postId, CommentCreateRequest request, Long memberId) {
-        validatePostExists(postId);  // SELECT 1 쿼리로 게시글 존재 확인
-        Post post = postRepository.getReferenceById(postId);  // Proxy 객체, 쿼리 발생 안 함
+        validatePostExists(postId);
+        Post post = postRepository.getReferenceById(postId);
         Member member = findMemberById(memberId);
 
         Comment comment = Comment.create(member, post, request.content());
         commentRepository.save(comment);
+
+        postRepository.incrementCommentCount(postId);
 
         return CommentResponse.of(comment, member);
     }
@@ -72,7 +74,12 @@ public class CommentService {
         Comment comment = findCommentByIdWithMember(commentId);
         ownershipPolicy.validateOwnership(comment.getMember().getId(), requesterId);
 
+        Long postId = commentRepository.findPostIdByCommentId(commentId)
+                .orElseThrow(() -> new CustomException(CommentErrorCode.COMMENT_NOT_FOUND));
+
         commentRepository.deleteById(comment.getId());
+
+        postRepository.decrementCommentCount(postId);
     }
 
     /**
