@@ -1,7 +1,6 @@
 package com.kakaotechbootcamp.community.domain.post.repository;
 
 import com.kakaotechbootcamp.community.domain.post.dto.PostQueryDto;
-import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,7 +13,7 @@ public interface PostQueryRepository {
     Page<PostQueryDto> findAllActiveWithMemberAsDto(Pageable pageable);
 
     /**
-     * 제목 또는 내용으로 게시글 검색
+     * 제목 또는 내용으로 게시글 검색 (Projection 사용 - 필요한 필드만)
      */
-    Page<Post> searchByTitleOrContent(String keyword, Pageable pageable);
+    Page<PostQueryDto> searchByTitleOrContent(String keyword, Pageable pageable);
 }

@@ -2,7 +2,6 @@ package com.kakaotechbootcamp.community.domain.post.repository.impl;
 
 import com.kakaotechbootcamp.community.domain.common.repository.QueryDslOrderUtil;
 import com.kakaotechbootcamp.community.domain.post.dto.PostQueryDto;
-import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import com.kakaotechbootcamp.community.domain.post.repository.PostQueryRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -39,12 +38,37 @@ public class PostRepositoryImpl implements PostQueryRepository {
 
     @Override
     public Page<PostQueryDto> findAllActiveWithMemberAsDto(Pageable pageable) {
-        OrderSpecifier<?>[] orders = QueryDslOrderUtil.getOrderSpecifiersWithDefault(
-                pageable,
-                post,
-                ALLOWED_SORT_FIELDS,
-                post.createdAt.desc()
-        );
+        List<PostQueryDto> content = queryFactory
+                .select(Projections.constructor(PostQueryDto.class,
+                        post.id,
+                        post.title,
+                        post.createdAt,
+                        post.viewsCount,
+                        post.likeCount,
+                        post.commentCount,
+                        member.id,
+                        member.nickname,
+                        member.email
+                ))
+                .from(post)
+                .join(post.member, member)
+                .where(isNotDeleted())
+                .orderBy(getOrderSpecifiers(pageable))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(post.count())
+                .from(post)
+                .where(isNotDeleted());
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Page<PostQueryDto> searchByTitleOrContent(String keyword, Pageable pageable) {
+        BooleanExpression condition = isNotDeleted().and(keywordSearch(keyword));
 
         List<PostQueryDto> content = queryFactory
                 .select(Projections.constructor(PostQueryDto.class,
@@ -60,49 +84,35 @@ public class PostRepositoryImpl implements PostQueryRepository {
                 ))
                 .from(post)
                 .join(post.member, member)
-                .where(post.isDeleted.eq(false))
-                .orderBy(orders)
+                .where(condition)
+                .orderBy(getOrderSpecifiers(pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        // Count 쿼리 (동일)
         JPAQuery<Long> countQuery = queryFactory
                 .select(post.count())
                 .from(post)
-                .where(post.isDeleted.eq(false));
+                .where(condition);
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
-    @Override
-    public Page<Post> searchByTitleOrContent(String keyword, Pageable pageable) {
-        // 동적 정렬 적용
-        OrderSpecifier<?>[] orders = QueryDslOrderUtil.getOrderSpecifiersWithDefault(
+    private OrderSpecifier<?>[] getOrderSpecifiers(Pageable pageable) {
+        return QueryDslOrderUtil.getOrderSpecifiersWithDefault(
                 pageable,
                 post,
                 ALLOWED_SORT_FIELDS,
                 post.createdAt.desc()
         );
+    }
 
-        BooleanExpression searchCondition = titleContains(keyword)
-                .or(contentContains(keyword));
+    private BooleanExpression isNotDeleted() {
+        return post.isDeleted.eq(false);
+    }
 
-        List<Post> content = queryFactory
-                .selectFrom(post)
-                .join(post.member, member).fetchJoin()
-                .where(searchCondition)
-                .orderBy(orders)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        JPAQuery<Long> countQuery = queryFactory
-                .select(post.count())
-                .from(post)
-                .where(searchCondition);
-
-        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    private BooleanExpression keywordSearch(String keyword) {
+        return titleContains(keyword).or(contentContains(keyword));
     }
 
     private BooleanExpression titleContains(String keyword) {
