@@ -37,3 +37,4 @@ out/
 .vscode/
 .claude/settings.local.json
 *.csv
+.env

@@ -50,6 +50,9 @@ dependencies {
 	// Spring Boot Configuration Processor
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
+    // 이지미 스토리지
+    implementation 'com.cloudinary:cloudinary-http44:1.32.0'
+
 	// 테스트
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
