@@ -64,9 +64,8 @@ public class PostController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePost(
             @Parameter(description = "게시글 ID") @PathVariable Long postId,
-            @RequestBody @Validated PostUpdateRequest request
+            @Parameter(description = "회원 ID") @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
-        Long memberId = request.memberId(); // TODO: JWT 도입 후 CurrentUser로 변경
         postService.deletePost(postId, memberId);
     }
 
