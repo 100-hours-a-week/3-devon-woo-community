@@ -74,7 +74,7 @@ class MemberServiceIntegrationTest {
         );
 
         // when
-        MemberUpdateResponse response = memberService.updateMember(TEST_MEMBER1_ID, request);
+        MemberUpdateResponse response = memberService.updateMember(TEST_MEMBER1_ID, request, null);
 
         // then
         assertThat(response).isNotNull();
@@ -96,7 +96,7 @@ class MemberServiceIntegrationTest {
         );
 
         // when
-        MemberUpdateResponse response = memberService.updateMember(TEST_MEMBER1_ID, request);
+        MemberUpdateResponse response = memberService.updateMember(TEST_MEMBER1_ID, request, null);
 
         // then
         assertThat(response).isNotNull();

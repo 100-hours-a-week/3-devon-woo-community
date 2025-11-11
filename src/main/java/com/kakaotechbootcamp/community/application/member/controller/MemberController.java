@@ -13,8 +13,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Member", description = "회원 관련 API")
 @RestController
@@ -37,12 +39,13 @@ public class MemberController {
 
     @Operation(summary = "회원 정보 수정", description = "회원의 프로필 정보를 수정합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.MEMBER_UPDATE)
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<MemberUpdateResponse> updateMember(
             @Parameter(description = "회원 ID") @PathVariable Long id,
-            @RequestBody @Validated MemberUpdateRequest request
+            @RequestPart(value = "request") @Validated MemberUpdateRequest request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
     ) {
-        MemberUpdateResponse response = memberService.updateMember(id, request);
+        MemberUpdateResponse response = memberService.updateMember(id, request, profileImage);
         return ApiResponse.success(response, "member_update_success");
     }
 
