@@ -83,9 +83,8 @@ public class CommentController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(
             @Parameter(description = "댓글 ID") @PathVariable Long commentId,
-            @RequestBody @Validated CommentUpdateRequest request
+            @Parameter(description = "회원 ID") @RequestParam Long memberId // TODO: JWT 도입 후 CurrentUser로 변경
     ) {
-        Long memberId = request.memberId(); // TODO: JWT 도입 후 CurrentUser로 변경
         commentService.deleteComment(commentId, memberId);
     }
 }

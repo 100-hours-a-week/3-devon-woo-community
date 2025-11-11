@@ -25,9 +25,9 @@ public record PostResponse(
         @Schema(description = "수정 시각")
         Instant updatedAt,
         @Schema(description = "조회수", example = "100")
-        Long views,
+        Long viewCount,
         @Schema(description = "좋아요 수", example = "10")
-        Long likes
+        Long likeCount
 ) {
     public static PostResponse of(Post post, Member member, Attachment attachment) {
         return new PostResponse(
