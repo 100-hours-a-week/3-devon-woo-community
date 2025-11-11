@@ -79,7 +79,8 @@ public class PostService {
         Post post = findByIdWithMember(postId);
         ownershipPolicy.validateOwnership(post.getMember().getId(), memberId);
 
-        postRepository.deleteById(postId);
+        post.delete();
+        postRepository.save(post);
     }
 
     /**

@@ -70,7 +70,8 @@ public class MemberService {
     @Transactional
     public void deleteMember(Long id) {
         Member member = findMemberById(id);
-        memberRepository.deleteById(member.getId());
+        member.withdraw();
+        memberRepository.save(member);
     }
 
 
