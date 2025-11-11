@@ -9,13 +9,9 @@ import com.kakaotechbootcamp.community.common.exception.CustomException;
 import com.kakaotechbootcamp.community.common.exception.code.MemberErrorCode;
 import com.kakaotechbootcamp.community.domain.member.entity.Member;
 import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository;
-import com.kakaotechbootcamp.community.infra.storage.ImageStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +19,6 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final MemberValidator memberValidator;
-    private final ImageStorage imageStorage;
 
     /**
      * 회원 프로필 조회
@@ -38,7 +33,7 @@ public class MemberService {
      * 회원 정보 수정
      */
     @Transactional
-    public MemberUpdateResponse updateMember(Long id, MemberUpdateRequest request, MultipartFile profileImage) {
+    public MemberUpdateResponse updateMember(Long id, MemberUpdateRequest request) {
         Member member = findMemberById(id);
 
         if (request.nickname() != null) {
@@ -46,9 +41,8 @@ public class MemberService {
             member.changeNickname(request.nickname());
         }
 
-        if (profileImage != null && !profileImage.isEmpty()) {
-            String imageUrl = imageStorage.upload(profileImage);
-            member.updateProfileImage(imageUrl);
+        if (request.profileImage() != null) {
+            member.updateProfileImage(request.profileImage());
         }
 
         memberRepository.save(member);
