@@ -2,6 +2,7 @@ package com.kakaotechbootcamp.community.application.member.controller;
 
 import com.kakaotechbootcamp.community.application.member.dto.request.MemberUpdateRequest;
 import com.kakaotechbootcamp.community.application.member.dto.request.PasswordUpdateRequest;
+import com.kakaotechbootcamp.community.application.member.dto.response.MemberDetailsResponse;
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberResponse;
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberUpdateResponse;
 import com.kakaotechbootcamp.community.application.member.service.MemberService;
@@ -27,10 +28,10 @@ public class MemberController {
     @Operation(summary = "회원 정보 조회", description = "회원의 프로필 정보를 조회합니다.")
     @CustomExceptionDescription(SwaggerResponseDescription.MEMBER_GET)
     @GetMapping("/{id}")
-    public ApiResponse<MemberResponse> getMemberProfile(
+    public ApiResponse<MemberDetailsResponse> getMemberProfile(
             @Parameter(description = "회원 ID") @PathVariable Long id
     ) {
-        MemberResponse response = memberService.getMemberProfile(id);
+        MemberDetailsResponse response = memberService.getMemberProfile(id);
         return ApiResponse.success(response, "member_get_success");
     }
 
