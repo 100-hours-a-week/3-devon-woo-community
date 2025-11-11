@@ -16,8 +16,13 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
 
-cloudinary:
-  cloud_name: ${CLOUDINARY_CLOUD_NAME}
-  api_key: ${CLOUDINARY_API_KEY}
-  api_secret: ${CLOUDINARY_API_SECRET}
+storage:
+  cloudinary:
+    api:
+      key: ${CLOUDINARY_API_KEY}
+      secret: ${CLOUDINARY_API_SECRET}
+    cloud:
+      name: ${CLOUDINARY_CLOUD_NAME}
+    upload:
+      preset: ${CLOUDINARY_UPLOAD_PRESET:ml_default}
 
