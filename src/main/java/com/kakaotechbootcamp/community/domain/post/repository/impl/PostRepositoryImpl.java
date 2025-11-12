@@ -48,7 +48,7 @@ public class PostRepositoryImpl implements PostQueryRepository {
                         post.commentCount,
                         member.id,
                         member.nickname,
-                        member.email
+                        member.profileImageUrl
                 ))
                 .from(post)
                 .join(post.member, member)

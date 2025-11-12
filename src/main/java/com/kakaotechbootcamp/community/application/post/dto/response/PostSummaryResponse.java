@@ -30,7 +30,7 @@ public record PostSummaryResponse(
                 new MemberResponse(
                         dto.memberId(),
                         dto.memberNickname(),
-                        dto.memberEmail()
+                        dto.memberProfileImageUrl()
                 ),
                 dto.createdAt(),
                 dto.viewsCount(),
