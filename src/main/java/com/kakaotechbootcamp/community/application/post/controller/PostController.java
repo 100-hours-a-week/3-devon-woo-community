@@ -77,7 +77,7 @@ public class PostController {
             @Parameter(description = "회원 ID") @RequestParam Long memberId, // TODO: JWT + Security 도입 후 CurrentUser에서 추출
             HttpServletRequest httpRequest
     ) {
-        PostResponse response = postService.getPostDetails(postId);
+        PostResponse response = postService.getPostDetails(postId, memberId);
 
         ViewContext context = ViewContext.from(httpRequest, memberId);
         postViewService.incrementViewCount(postId, context);

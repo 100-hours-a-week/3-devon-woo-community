@@ -15,6 +15,7 @@ import com.kakaotechbootcamp.community.domain.member.repository.MemberRepository
 import com.kakaotechbootcamp.community.domain.post.entity.Attachment;
 import com.kakaotechbootcamp.community.domain.post.entity.Post;
 import com.kakaotechbootcamp.community.domain.post.repository.AttachmentRepository;
+import com.kakaotechbootcamp.community.domain.post.repository.PostLikeRepository;
 import com.kakaotechbootcamp.community.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,7 +33,7 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final AttachmentRepository attachmentRepository;
     private final OwnershipPolicy ownershipPolicy;
-
+    private final PostLikeRepository postLikeRepository;
 
     /**
      * 게시글 생성
@@ -87,14 +88,19 @@ public class PostService {
      * 게시글 조회
      */
     @Transactional(readOnly = true)
-    public PostResponse getPostDetails(Long postId) {
+    public PostResponse getPostDetails(Long postId, Long memberId) {
         Post post = findByIdWithMember(postId);
 
         Member member = post.getMember();
         Attachment attachment = attachmentRepository.findByPostId(postId)
                 .orElse(null);
 
-        return PostResponse.of(post, member, attachment);
+        boolean isLiked = false;
+        if(memberId != null && postLikeRepository.existsByPostIdAndMemberId(postId, memberId)){
+            isLiked = true;
+        }
+
+        return PostResponse.of(post, member, attachment, isLiked);
     }
 
     /**
