@@ -27,9 +27,15 @@ public record PostResponse(
         @Schema(description = "조회수", example = "100")
         Long viewCount,
         @Schema(description = "좋아요 수", example = "10")
-        Long likeCount
+        Long likeCount,
+        @Schema(description = "회원의 좋아요 여부", example = "false")
+        boolean isLiked
 ) {
     public static PostResponse of(Post post, Member member, Attachment attachment) {
+        return of(post, member, attachment, false);
+    }
+
+    public static PostResponse of(Post post, Member member, Attachment attachment, boolean isLiked) {
         return new PostResponse(
                 post.getId(),
                 MemberResponse.of(member),
@@ -39,7 +45,8 @@ public record PostResponse(
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
                 post.getViewsCount(),
-                post.getLikeCount()
+                post.getLikeCount(),
+                isLiked
         );
     }
 }

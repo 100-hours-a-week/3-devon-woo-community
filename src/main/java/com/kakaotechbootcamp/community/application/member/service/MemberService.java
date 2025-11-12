@@ -2,6 +2,7 @@ package com.kakaotechbootcamp.community.application.member.service;
 
 import com.kakaotechbootcamp.community.application.member.dto.request.MemberUpdateRequest;
 import com.kakaotechbootcamp.community.application.member.dto.request.PasswordUpdateRequest;
+import com.kakaotechbootcamp.community.application.member.dto.response.MemberDetailsResponse;
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberResponse;
 import com.kakaotechbootcamp.community.application.member.dto.response.MemberUpdateResponse;
 import com.kakaotechbootcamp.community.application.member.validator.MemberValidator;
@@ -24,9 +25,9 @@ public class MemberService {
      * 회원 프로필 조회
      */
     @Transactional(readOnly = true)
-    public MemberResponse getMemberProfile(Long id) {
+    public MemberDetailsResponse getMemberProfile(Long id) {
         Member member = findMemberById(id);
-        return MemberResponse.of(member);
+        return MemberDetailsResponse.of(member);
     }
 
     /**
@@ -70,7 +71,8 @@ public class MemberService {
     @Transactional
     public void deleteMember(Long id) {
         Member member = findMemberById(id);
-        memberRepository.deleteById(member.getId());
+        member.withdraw();
+        memberRepository.save(member);
     }
 
 
